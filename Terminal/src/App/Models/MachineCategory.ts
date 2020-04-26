@@ -1,5 +1,5 @@
 import React from "react";
-import MachinePrototype from "../../Models/MachinePrototype";
+import MachinePrototype from "./MachinePrototype";
 import {observable} from "mobx";
 
 export default class MachineCategory {

@@ -1,11 +1,13 @@
 import React, {useState} from "react";
 import styled from "styled-components";
 import {useStores} from "../../../Hooks/useStores";
-import Point from "../../../shared/Point";
-import MachineCategoryPresenter from "../../State/MachineCategory/MachineCategoryPresenter";
-import MachineCategory from "../../State/MachineCategory/MachineCategory";
+import MachineCategory from "../../Models/MachineCategory";
+import ContextMenuContentProps from "../ContextMenu/ContextMenuContentProps";
 
-export default function SmartMenu({onHide}: { onHide: () => void }) {
+export default function SmartMenu({
+                                    menuPos,
+                                    setVisible
+                                  }: ContextMenuContentProps) {
   var {factoryStore} = useStores();
   const [category, setCategory] = useState<MachineCategory | null>(null);
 
@@ -14,15 +16,13 @@ export default function SmartMenu({onHide}: { onHide: () => void }) {
         <Card>
           <CategoriesContainer>
             {factoryStore.machineCategories.map(cat => (
-                <CategoryWrapper onClick={() => setCategory(cat)} key={cat.name}>
-                  <MachineCategoryPresenter state={cat}/>
-                  {/* {cat.machines.map(m => (
-                <button
-                  key={m.id.toString()}
-                  onClick={() => factoryStore.createInstance(m.id, Point.Zero)}
+                <CategoryWrapper
+                    key={cat.name}
+                    onClick={() => setCategory(cat)}
                 >
-                  {m.name}
-                </button>*/}
+                  <CategoryItem style={{backgroundColor: cat.color}}>
+                    {cat.icon()}
+                  </CategoryItem>
                 </CategoryWrapper>
             ))}
           </CategoriesContainer>
@@ -31,9 +31,9 @@ export default function SmartMenu({onHide}: { onHide: () => void }) {
                 {category.machines.map(m => (
                     <MachinesListItem
                         key={m.id.toString()}
-                        onClick={() => {
-                          factoryStore.createInstance(m.id, Point.Zero);
-                          onHide();
+                        onClick={ev => {
+                          factoryStore.createInstance(m.id, menuPos);
+                          setVisible(false);
                         }}
                     >
                       {m.name}
@@ -42,22 +42,17 @@ export default function SmartMenu({onHide}: { onHide: () => void }) {
               </MachinesList>
           ) : null}
         </Card>
-        {/* {Object.entries(groups).map(([cat, protos]: [any, any]) =>
-        protos.map((proto: MachinePrototype) => (
-          <MenuItem
-            onClick={ev => {
-              factoryStore.createInstance(proto.id, new Point(0, 0));
-            }}
-            data={{ foo: "bar" }}
-            key={proto.id.toString()}
-          >
-            {proto.name}
-          </MenuItem>
-        ))
-      )}*/}
       </>
   );
 }
+
+const CategoryItem = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  height: 40px;
+`;
 
 const CategoriesContainer = styled.div`
   display: flex;

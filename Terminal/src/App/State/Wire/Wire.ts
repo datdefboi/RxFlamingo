@@ -6,6 +6,8 @@ export default class Wire {
   toSocket: Socket | null = null;
   id: UUID = UUID.Empty;
 
+  bufferQueue: any[] = [];
+
   constructor(from: Socket | null, to: Socket | null) {
     this.fromSocket = from;
     this.toSocket = to;
