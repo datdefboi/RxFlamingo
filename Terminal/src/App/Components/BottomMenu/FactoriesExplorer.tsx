@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import PlusIcon from "mdi-react/PlusIcon";
 import { useStores } from "../../../Hooks/useStores";
-import RecordScheme, { RecordField } from "../../Models/RecordScheme";
+import RecordType, { RecordField } from "../../Models/RecordType";
 import { useObserver } from "mobx-react-lite";
 import CardPlusOutlineIcon from "mdi-react/CardPlusOutlineIcon";
 import CardOutlineIcon from "mdi-react/CardOutlineIcon";
@@ -10,11 +10,12 @@ import ContentSaveIcon from "mdi-react/ContentSaveIcon";
 import UUID from "../../../shared/UUID";
 import RemoveIcon from "mdi-react/RemoveIcon";
 
-export default function RecordsExplorer(props: any) {
+export default function FactoriesExplorer(props: any) {
   const { appStore } = useStores();
+  const pkg = appStore.currentPackage;
 
   function CreateRecord() {
-    appStore.recordsRepo.push({
+    pkg.records.push({
       buildinRepresentation: "none",
       fields: [],
       id: UUID.Generate(),
@@ -23,16 +24,16 @@ export default function RecordsExplorer(props: any) {
     });
   }
 
-  function CreateField(record: RecordScheme) {
+  function CreateField(record: RecordType) {
     record.fields.push({
       name: "newField",
-      scheme: null,
+      type: null,
       id: UUID.Generate(),
       isRenames: true
     });
   }
 
-  function RenderRecord(r: RecordScheme) {
+  function RenderRecord(r: RecordType) {
     return (
       <Record key={r.id.toString()}>
         {!r.isRenames ? (
@@ -91,22 +92,22 @@ export default function RecordsExplorer(props: any) {
   }
 
   return useObserver(() => (
-    <Container>
+    <>
       <Title>
-        Обозреватель записей{" "}
+        Обозреватель фабрик{" "}
         <PlusIcon
           onClick={CreateRecord}
           size={20}
           style={{ color: "lightgreen", paddingLeft: 12, cursor: "pointer" }}
         />
       </Title>
-      {appStore.recordsRepo.map(r => (
+    {/*  {appStore.recordsRepo.map(r => (
         <RecordGroup>
           {RenderRecord(r)}
           {r.fields.map(f => RenderField(f))}
         </RecordGroup>
-      ))}
-    </Container>
+      ))}*/}
+    </>
   ));
 }
 

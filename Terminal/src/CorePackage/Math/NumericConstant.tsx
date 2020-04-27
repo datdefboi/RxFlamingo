@@ -1,10 +1,9 @@
 import React from "react";
-import SocketType from "../../../App/Models/SocketType";
-import MachinePrototype from "../../../App/Models/MachinePrototype";
-import UUID from "../../../shared/UUID";
-import Machine from "../../../App/State/Machine/Machine";
+import SocketType from "../../App/Models/SocketType";
+import MachinePrototype from "../../App/Models/MachinePrototype";
+import UUID from "../../shared/UUID";
+import Machine from "../../App/State/Machine/Machine";
 import styled from "styled-components";
-
 export default class NumericConstant extends MachinePrototype {
   sockets = [
     {

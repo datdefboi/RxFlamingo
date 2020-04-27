@@ -1,6 +1,6 @@
 import React from "react";
-import MachineCategory from "../../../App/Models/MachineCategory";
 import ViewDashboardOutlineIcon from "mdi-react/ViewDashboardOutlineIcon";
+import MachineCategory from "../../App/Models/MachineCategory";
 
 export default new MachineCategory(
     "Мониторинг",

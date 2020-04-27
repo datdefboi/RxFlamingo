@@ -1,48 +1,49 @@
-import React, {useState} from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import {useStores} from "../../../Hooks/useStores";
+import { useStores } from "../../../Hooks/useStores";
 import MachineCategory from "../../Models/MachineCategory";
 import ContextMenuContentProps from "../ContextMenu/ContextMenuContentProps";
 
 export default function SmartMenu({
-                                    menuPos,
-                                    setVisible
-                                  }: ContextMenuContentProps) {
-  var {factoryStore} = useStores();
+  menuPos,
+  setVisible
+}: ContextMenuContentProps) {
+  var { appStore } = useStores();
   const [category, setCategory] = useState<MachineCategory | null>(null);
 
   return (
-      <>
-        <Card>
-          <CategoriesContainer>
-            {factoryStore.machineCategories.map(cat => (
-                <CategoryWrapper
-                    key={cat.name}
-                    onClick={() => setCategory(cat)}
-                >
-                  <CategoryItem style={{backgroundColor: cat.color}}>
-                    {cat.icon()}
-                  </CategoryItem>
-                </CategoryWrapper>
+    <>
+      <Card>
+        <CategoriesContainer>
+          {appStore.machineCategories.map(cat => (
+            <CategoryWrapper
+              key={cat.name}
+              style={{ filter: category === cat ? "brightness(120%)" : "" }}
+              onClick={() => setCategory(cat)}
+            >
+              <CategoryItem style={{ backgroundColor: cat.color }}>
+                {cat.icon()}
+              </CategoryItem>
+            </CategoryWrapper>
+          ))}
+        </CategoriesContainer>
+        {category ? (
+          <MachinesList>
+            {category.machines.map(m => (
+              <MachinesListItem
+                key={m.id.toString()}
+                onClick={ev => {
+                  appStore.createInstance(m.id, menuPos);
+                  setVisible(false);
+                }}
+              >
+                {m.name}
+              </MachinesListItem>
             ))}
-          </CategoriesContainer>
-          {category ? (
-              <MachinesList>
-                {category.machines.map(m => (
-                    <MachinesListItem
-                        key={m.id.toString()}
-                        onClick={ev => {
-                          factoryStore.createInstance(m.id, menuPos);
-                          setVisible(false);
-                        }}
-                    >
-                      {m.name}
-                    </MachinesListItem>
-                ))}
-              </MachinesList>
-          ) : null}
-        </Card>
-      </>
+          </MachinesList>
+        ) : null}
+      </Card>
+    </>
   );
 }
 
@@ -82,7 +83,7 @@ const CategoryWrapper = styled.div`
 `;
 
 const Card = styled.div`
-  min-width: 140px;
+  min-width: 200px;
   min-height: 200px;
   background-color: #14151b;
   border-radius: 4px;
