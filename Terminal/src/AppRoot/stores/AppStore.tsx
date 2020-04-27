@@ -1,5 +1,5 @@
 import React from "react";
-import {action, observable} from "mobx";
+import { action, observable } from "mobx";
 import Point from "../../shared/Point";
 import UUID from "../../shared/UUID";
 import Factory from "../../App/State/Factory/Factory";
@@ -11,6 +11,8 @@ import MathCategory from "../../CorePackage/machines/Math/MathCategory";
 import NumericConstant from "../../CorePackage/machines/Math/NumericConstant";
 import MonitoringCategory from "../../CorePackage/machines/Monitoring/MonitoringCategory";
 import TextLog from "../../CorePackage/machines/Monitoring/TextLog";
+import TextCategory from "../../CorePackage/machines/Text/TextCategory";
+import TextConstant from "../../CorePackage/machines/Text/TextConstant";
 
 export default class FactoryStore {
   @observable machinePrototypes: MachinePrototype[] = [];
@@ -27,17 +29,23 @@ export default class FactoryStore {
   }
 
   @action initValues() {
-    var mathCat = MathCategory;
-    var monitorCat = MonitoringCategory;
+    const mathCat = MathCategory;
+    const monitorCat = MonitoringCategory;
+    const textCat = TextCategory;
 
-    this.machineCategories.push(...[mathCat, monitorCat]);
+    this.machineCategories.push(...[mathCat, monitorCat, textCat]);
 
     mathCat.machines.push(
-        new AdditionMachine(mathCat),
-        new NumericConstant(mathCat)
+      new AdditionMachine(mathCat),
+      new NumericConstant(mathCat)
     );
     monitorCat.machines.push(new TextLog(monitorCat));
+    textCat.machines.push(new TextConstant(textCat));
 
-    this.machinePrototypes.push(...mathCat.machines, ...monitorCat.machines);
+    this.machinePrototypes.push(
+      ...mathCat.machines,
+      ...monitorCat.machines,
+      ...textCat.machines
+    );
   }
 }
