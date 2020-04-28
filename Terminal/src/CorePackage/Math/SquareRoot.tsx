@@ -6,30 +6,24 @@ import UUID from "../../shared/UUID";
 import Machine from "../../App/Presenters/Machine/Machine";
 import RecordData from "../../App/Models/Record";
 
-export default class AdditionMachine extends MachinePrototype {
+export default class SquareRootMachine extends MachinePrototype {
   sockets = [
     {
       id: 0,
-      title: "A",
+      title: "X",
       typeID: UUID.FromString("7690b191-7157-427e-9841-8f3576306e5b"),
       type: SocketType.Input,
     },
     {
       id: 1,
-      title: "B",
-      typeID: UUID.FromString("7690b191-7157-427e-9841-8f3576306e5b"),
-      type: SocketType.Input,
-    },
-    {
-      id: 2,
-      title: "A+B",
+      title: "√X",
       typeID: UUID.FromString("7690b191-7157-427e-9841-8f3576306e5b"),
       type: SocketType.Output,
     },
   ];
 
-  id = UUID.FromString("ae5eb614-a1ee-4382-9b09-c4a5e9c296a7");
-  name = "Суммирование";
+  id = UUID.FromString("2e292cc7-0e20-47a9-bebe-1d605bdeb4fa");
+  name = "Получить корень";
   title = "";
 
   async invoke(self: Machine, props: RecordData[]) {
@@ -37,7 +31,7 @@ export default class AdditionMachine extends MachinePrototype {
     return {
       fields: [],
       type: numT,
-      value: props[0].value + props[1].value,
+      value: Math.sqrt(props[0].value),
     } as RecordData;
   }
 }

@@ -3,7 +3,7 @@ import React, {
   ReactNode,
   useEffect,
   useRef,
-  useState
+  useState,
 } from "react";
 import styled from "styled-components";
 import Wire from "../Wire/Wire";
@@ -20,7 +20,7 @@ import ContentSaveMoveIcon from "mdi-react/ContentSaveMoveIcon";
 
 export default function BlockPresenter({
   state,
-  children
+  children,
 }: {
   children: ReactNode;
   state: Machine;
@@ -65,13 +65,13 @@ export default function BlockPresenter({
     }
   }
 
-  const barStyle = { backgroundColor: state.proto?.category.color };
+  const barStyle = { backgroundColor: state.color };
   //chevron-triple-right step-forward-2 content-save-move content-save-outline
   return useObserver(() => (
     <BlockContainer onMouseDown={OnMouseDown} ref={ref}>
       <TopBar style={barStyle}>{state.proto?.title}</TopBar>
       <DocksContainer>{children}</DocksContainer>
-      <BottomBar style={barStyle}>
+      <BottomBar onMouseDown={(ev)=>ev.stopPropagation()} style={barStyle}>
         {state.proto.isInvocable ? (
           <>
             {state.cacheOut ? (
@@ -88,7 +88,7 @@ export default function BlockPresenter({
             )}
 
             <PlayIcon
-              onClick={ev => {
+              onClick={(ev) => {
                 ev.stopPropagation();
                 state.playCurrent();
               }}
@@ -124,7 +124,7 @@ const TopBar = styled(Bar)`
   border-radius: 4px 4px 0 0;
   font-size: 14px;
   padding: 4px;
-  border-bottom: 1px ${p => p.theme.strain.border} solid;
+  border-bottom: 1px ${(p) => p.theme.strain.border} solid;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -134,7 +134,7 @@ const TopBar = styled(Bar)`
 
 const BottomBar = styled(Bar)`
   border-radius: 0 0 4px 4px;
-  border-top: 1px ${p => p.theme.strain.border} solid;
+  border-top: 1px ${(p) => p.theme.strain.border} solid;
   display: flex;
   justify-content: flex-end;
   padding: 4px;

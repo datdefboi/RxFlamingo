@@ -2,17 +2,19 @@ import SocketType from "../../App/Models/SocketType";
 import MachinePrototype from "../../App/Models/MachinePrototype";
 import UUID from "../../shared/UUID";
 import PlayIcon from "mdi-react/PlayIcon";
-import Machine from "../../App/State/Machine/Machine";
+import Machine from "../../App/Presenters/Machine/Machine";
 import React from "react";
 import styled from "styled-components";
+import RecordData from "../../App/Models/Record";
 
 export default class TextLog extends MachinePrototype {
   sockets = [
     {
       id: 0,
       title: "",
-      type: SocketType.Input
-    }
+      typeID: UUID.FromString("7690b191-7157-427e-9841-8f3576306e5b"),
+      type: SocketType.Input,
+    },
   ];
 
   id = UUID.FromString("c8941786-aaf1-4f57-b0a6-144a5a825ff8");
@@ -21,9 +23,10 @@ export default class TextLog extends MachinePrototype {
 
   initShape = { records: [] };
 
-  async invoke(self: Machine, props: string[][]) {
-    var records = props[0];
-    self.state.records = [...records, ...self.state.records];
+  async invoke(self: Machine, props: RecordData[]): Promise<null> {
+    var record = props[0].value;
+    self.state.records = [record, ...self.state.records];
+    return null;
   }
 
   content = (self: Machine) => (

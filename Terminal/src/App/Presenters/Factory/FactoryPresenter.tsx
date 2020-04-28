@@ -9,7 +9,7 @@ import styled from "styled-components";
 import WirePresenter from "../Wire/WirePresenter";
 import MachinePresenter from "../Machine/MachinePresenter";
 import ContextMenu from "../../Components/ContextMenu/ContextMenu";
-import SmartMenu from "../../Components/SmartMenu/SmartMenu";
+import SmartMenu from "../../Components/Menus/SmartMenu";
 
 export default ({ state }: { state: Factory }) => {
   const [viewDragOffset, setViewDragOffset] = useState(Point.Zero);
@@ -62,23 +62,26 @@ export default ({ state }: { state: Factory }) => {
   return useObserver(() => (
     <ContextMenu
       Content={SmartMenu}
-      Activator={mouseHandler =>
+      Activator={(show) =>
         useObserver(() => (
           <Container
             onDragOver={(ev: React.MouseEvent) => ev.preventDefault()}
             onMouseDown={OnMouseDown}
-            onContextMenu={mouseHandler}
+            onContextMenu={(ev) => {
+              ev.preventDefault();
+              show(new Point(ev.clientX, ev.clientY));
+            }}
             style={{
               overflow: "hidden",
-              backgroundPosition: `${state.viewOffset.x}px ${state.viewOffset.y}px`
+              backgroundPosition: `${state.viewOffset.x}px ${state.viewOffset.y}px`,
             }}
           >
             <MovingContainer
               style={{
-                transform: `translate(${state.viewOffset.x}px,${state.viewOffset.y}px)`
+                transform: `translate(${state.viewOffset.x}px,${state.viewOffset.y}px)`,
               }}
             >
-              {state.instances.map(m => {
+              {state.instances.map((m) => {
                 return (
                   <>
                     <StrainContainer
@@ -86,7 +89,7 @@ export default ({ state }: { state: Factory }) => {
                         zIndex: 4,
                         transform: `translate(${+m.position.x}px, ${
                           m.position.y
-                        }px)`
+                        }px)`,
                       }}
                       key={m.id.toString()}
                     >
@@ -94,11 +97,11 @@ export default ({ state }: { state: Factory }) => {
                     </StrainContainer>
                     {m.wires
                       .filter(
-                        p =>
+                        (p) =>
                           p.fromSocket!.getPositionAction &&
                           p.toSocket?.machine === m
                       )
-                      .map(wire => (
+                      .map((wire) => (
                         <WirePresenter key={wire.id.toString()} state={wire} />
                       ))}
                   </>
@@ -123,16 +126,16 @@ const Container = styled.div`
   position: relative;
   background-image: repeating-linear-gradient(
       transparent 0px,
-      transparent ${p => p.theme.flow.step}px,
-      ${p => p.theme.flow.border} ${p => p.theme.flow.step}px,
-      ${p => p.theme.flow.border} ${p => p.theme.flow.step + 1}px
+      transparent ${(p) => p.theme.flow.step}px,
+      ${(p) => p.theme.flow.border} ${(p) => p.theme.flow.step}px,
+      ${(p) => p.theme.flow.border} ${(p) => p.theme.flow.step + 1}px
     ),
     repeating-linear-gradient(
       90deg,
       transparent 0px,
-      ${p => p.theme.flow.background} ${p => p.theme.flow.step}px,
-      ${p => p.theme.flow.border} ${p => p.theme.flow.step}px,
-      ${p => p.theme.flow.border} ${p => p.theme.flow.step + 1}px
+      ${(p) => p.theme.flow.background} ${(p) => p.theme.flow.step}px,
+      ${(p) => p.theme.flow.border} ${(p) => p.theme.flow.step}px,
+      ${(p) => p.theme.flow.border} ${(p) => p.theme.flow.step + 1}px
     );
 `;
 

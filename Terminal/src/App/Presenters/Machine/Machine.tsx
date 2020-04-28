@@ -8,6 +8,7 @@ import MachineCategory from "../../Models/MachineCategory";
 import SocketPrototype from "../../Models/SocketPrototype";
 import MachinePrototype from "../../Models/MachinePrototype";
 import Wire from "../Wire/Wire";
+import AppStore from "../../../AppRoot/stores/AppStore";
 
 export default class Machine {
   @observable id: UUID = UUID.Empty;
@@ -16,20 +17,21 @@ export default class Machine {
   @observable proto: MachinePrototype;
   @observable wires: Wire[] = [];
   @observable cacheOut = false;
-
   @observable state: any;
+  color: string = "black";
 
   async playCurrent() {
     await new Promise(async (resolve, reject) => {
       const deps = [];
-      const depsWires = this.wires.filter(p => p.toSocket?.machine === this);
+      const depsWires = this.wires.filter((p) => p.toSocket?.machine === this);
       for (var dep of depsWires) {
         var data = dep.bufferQueue;
         dep.executionRequested = true;
         if (!data) deps.push(dep.fromSocket?.machine.playCurrent());
       }
+
       await Promise.all(deps);
-      var props = depsWires.map(p => {
+      var props = depsWires.map((p) => {
         const t = p.bufferQueue;
         p.bufferQueue = null;
         return t;
@@ -39,24 +41,25 @@ export default class Machine {
       console.info("invocation of ", this.id.toString(), "=", result);
 
       const targetWires = this.wires.filter(
-        p => p.fromSocket?.machine === this
+        (p) => p.fromSocket?.machine === this
       );
 
       const propagationQueue = [];
       for (var wire of targetWires) {
-        wire.bufferQueue = result ? result : []; // TODO
-        propagationQueue.push(wire.toSocket?.machine.playCurrent());
+        wire.bufferQueue = result; // TODO
+        if (wire.executionRequested == false)
+          propagationQueue.push(wire.toSocket?.machine.playCurrent());
+        else wire.executionRequested = false;
       }
       await Promise.all(propagationQueue);
-
       resolve();
     });
   }
 
-  constructor(proto: MachinePrototype) {
+  constructor(proto: MachinePrototype, appStore: AppStore) {
     this.proto = proto;
     this.state = { ...proto.initShape };
-    this.sockets = proto.sockets.map(p => new Socket(p, this));
+    this.sockets = proto.sockets.map((p) => new Socket(p, appStore, this));
     this.id = UUID.Generate();
   }
 

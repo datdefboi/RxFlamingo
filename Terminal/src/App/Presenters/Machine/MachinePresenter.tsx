@@ -12,7 +12,7 @@ export default ({ state }: { state: Machine }) => {
       <div
         style={{
           ...style,
-          backgroundColor: state.proto.category.color,
+          backgroundColor: state.color,
           flex: 1
         }}
       />
@@ -38,7 +38,7 @@ export default ({ state }: { state: Machine }) => {
           paddingBottom: 4
         }}
       />
-      <ContentContainer style={{ backgroundColor: state.proto.category.color }}>
+      <ContentContainer style={{ backgroundColor: state.color }}>
         {state.proto.content(state)}
       </ContentContainer>
       <Spacer

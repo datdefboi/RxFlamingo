@@ -6,6 +6,7 @@ import Wire from "../Wire/Wire";
 import Socket from "./Socket";
 import useGlobalTheme from "../../../Hooks/useGlobalTheme";
 import styled from "styled-components";
+import UUID from "../../../shared/UUID";
 
 export default ({ state }: { state: Socket }) => {
   const [isHover, setIsHover] = useState(false);
@@ -46,7 +47,8 @@ export default ({ state }: { state: Socket }) => {
   const MouseEnter = () => {
     if (
       !factory.linkerWire ||
-      factory.linkerWire?.fromSocket?.type !== state.type
+      (factory.linkerWire?.fromSocket?.type !== state.type &&
+        factory.linkerWire.fromSocket?.recordType === state.recordType)
     )
       setIsHover(true);
   };
@@ -59,7 +61,8 @@ export default ({ state }: { state: Socket }) => {
   const TryMakeWire = () => {
     if (
       factory.linkerWire &&
-      factory.linkerWire?.fromSocket?.type !== state.type
+      factory.linkerWire?.fromSocket?.type !== state.type &&
+      factory.linkerWire.fromSocket?.recordType === state.recordType
     ) {
       const wire = factory.linkerWire;
       factory.linkerWire = null;
@@ -80,8 +83,10 @@ export default ({ state }: { state: Socket }) => {
         {
           type: state.type,
           title: "",
-          id: 0
+          typeID: state.recordType?.id ?? UUID.Empty,
+          id: 0,
         },
+        appStore,
         state.machine
       );
       virtualSocket.getPositionAction = () => new Point(x, y);
@@ -106,7 +111,7 @@ export default ({ state }: { state: Socket }) => {
   const DockContainer = ({
     children,
     left,
-    right
+    right,
   }: {
     children: React.ReactNode;
     left: number | string;
@@ -121,7 +126,7 @@ export default ({ state }: { state: Socket }) => {
         left,
         cursor: "crosshair",
         paddingTop: 2,
-        position: "absolute"
+        position: "absolute",
       }}
       width="22"
       height="19"
@@ -133,7 +138,7 @@ export default ({ state }: { state: Socket }) => {
     </svg>
   );
 
-  const categoryColor = state.machine.proto?.category.color;
+  const categoryColor = state.machine.color;
 
   return (
     <>
@@ -145,7 +150,7 @@ export default ({ state }: { state: Socket }) => {
               marginRight: -8,
               position: "relative",
               backgroundColor: categoryColor,
-              zIndex: 1
+              zIndex: 1,
             }}
           >
             {state.title}

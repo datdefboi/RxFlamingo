@@ -6,6 +6,8 @@ export default class RecordType {
   @observable id: UUID = UUID.Empty;
   @observable fields: RecordField[] = [];
   @observable buildinRepresentation: string = "number";
+  @observable editable = true;
+  @observable defaultValue: any;
 
   isRenames = false;
 }

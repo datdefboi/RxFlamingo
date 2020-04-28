@@ -19,8 +19,10 @@ export default function RecordsExplorer(props: any) {
       buildinRepresentation: "none",
       fields: [],
       id: UUID.Generate(),
+      defaultValue: null,
       isRenames: true,
-      name: "new record"
+      name: "new record",
+      editable: true,
     });
   }
 
@@ -29,7 +31,7 @@ export default function RecordsExplorer(props: any) {
       name: "newField",
       type: null,
       id: UUID.Generate(),
-      isRenames: true
+      isRenames: true,
     });
   }
 
@@ -37,14 +39,14 @@ export default function RecordsExplorer(props: any) {
     return (
       <Record key={r.id.toString()}>
         {!r.isRenames ? (
-          <RecordTitle onClick={() => (r.isRenames = true)}>
+          <RecordTitle onClick={() => (r.isRenames = r.editable && true)}>
             {r.name}
           </RecordTitle>
         ) : (
           <>
             <RecordRenameField
               value={r.name}
-              onChange={ev => (r.name = ev.target.value)}
+              onChange={(ev) => (r.name = ev.target.value)}
             />
             <ContentSaveIcon
               style={{ paddingLeft: 4, cursor: "pointer" }}
@@ -53,11 +55,13 @@ export default function RecordsExplorer(props: any) {
             />
           </>
         )}
-        <CardPlusOutlineIcon
-          onClick={() => CreateField(r)}
-          size={14}
-          style={{ color: "lightgreen", paddingLeft: 12, cursor: "pointer" }}
-        />
+        {r.editable ? (
+          <CardPlusOutlineIcon
+            onClick={() => CreateField(r)}
+            size={14}
+            style={{ color: "lightgreen", paddingLeft: 12, cursor: "pointer" }}
+          />
+        ) : null}
       </Record>
     );
   }
@@ -78,7 +82,7 @@ export default function RecordsExplorer(props: any) {
             <RecordRenameField
               value={r.name}
               autoFocus={true}
-              onChange={ev => (r.name = ev.target.value)}
+              onChange={(ev) => (r.name = ev.target.value)}
             />
             <ContentSaveIcon
               style={{ paddingLeft: 4, cursor: "pointer" }}
@@ -102,12 +106,20 @@ export default function RecordsExplorer(props: any) {
         />
       </Title>
       <RecordsContainer>
-        {pkg.records.map(r => (
+        {pkg.records.map((r) => (
           <RecordGroup>
             {RenderRecord(r)}
-            {r.fields.map(f => RenderField(f))}
+            {r.fields.map((f) => RenderField(f))}
           </RecordGroup>
         ))}
+        {appStore.loadedPackages.map((p) =>
+          p.records.map((r) => (
+            <RecordGroup>
+              {RenderRecord(r)}
+              {r.fields.map((f) => RenderField(f))}
+            </RecordGroup>
+          ))
+        )}
       </RecordsContainer>
     </>
   ));

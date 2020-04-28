@@ -18,9 +18,11 @@ export default function FactoriesExplorer(props: any) {
     pkg.records.push({
       buildinRepresentation: "none",
       fields: [],
+      defaultValue: null,
       id: UUID.Generate(),
       isRenames: true,
-      name: "new record"
+      name: "new record",
+      editable: true,
     });
   }
 
@@ -29,7 +31,7 @@ export default function FactoriesExplorer(props: any) {
       name: "newField",
       type: null,
       id: UUID.Generate(),
-      isRenames: true
+      isRenames: true,
     });
   }
 
@@ -44,7 +46,7 @@ export default function FactoriesExplorer(props: any) {
           <>
             <RecordRenameField
               value={r.name}
-              onChange={ev => (r.name = ev.target.value)}
+              onChange={(ev) => (r.name = ev.target.value)}
             />
             <ContentSaveIcon
               style={{ paddingLeft: 4, cursor: "pointer" }}
@@ -78,7 +80,7 @@ export default function FactoriesExplorer(props: any) {
             <RecordRenameField
               value={r.name}
               autoFocus={true}
-              onChange={ev => (r.name = ev.target.value)}
+              onChange={(ev) => (r.name = ev.target.value)}
             />
             <ContentSaveIcon
               style={{ paddingLeft: 4, cursor: "pointer" }}
@@ -101,7 +103,7 @@ export default function FactoriesExplorer(props: any) {
           style={{ color: "lightgreen", paddingLeft: 12, cursor: "pointer" }}
         />
       </Title>
-    {/*  {appStore.recordsRepo.map(r => (
+      {/*  {appStore.recordsRepo.map(r => (
         <RecordGroup>
           {RenderRecord(r)}
           {r.fields.map(f => RenderField(f))}

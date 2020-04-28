@@ -7,13 +7,13 @@ import AppStore from "./stores/AppStore";
 
 import "./global.css";
 import ThemeStore from "./stores/ThemeStore";
-import FactoryPresenter from "../App/State/Factory/FactoryPresenter";
+import FactoryPresenter from "../App/Presenters/Factory/FactoryPresenter";
 import RecordsExplorer from "../App/Components/BottomMenu/RecordsExplorer";
 import FactoriesExplorer from "../App/Components/BottomMenu/FactoriesExplorer";
 
 const stores = {
   themeStore: new ThemeStore(),
-  appStore: new AppStore()
+  appStore: new AppStore(),
 };
 for (const store in stores) {
   // @ts-ignore
@@ -24,6 +24,7 @@ export const storesContext = React.createContext(stores);
 export default function App() {
   const { themeStore, appStore } = useStores();
   appStore.initValues();
+  appStore.initDefaultPackages();
 
   return useObserver(() => (
     <ThemeProvider theme={themeStore.currentTheme}>
@@ -57,5 +58,5 @@ const AppContainer = styled.div`
   height: 100%;
   display: flex;
   flex-direction: column;
-  background-color: ${p => p.theme.flow.background};
+  background-color: ${(p) => p.theme.flow.background};
 `;

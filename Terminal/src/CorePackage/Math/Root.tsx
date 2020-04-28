@@ -6,30 +6,30 @@ import UUID from "../../shared/UUID";
 import Machine from "../../App/Presenters/Machine/Machine";
 import RecordData from "../../App/Models/Record";
 
-export default class AdditionMachine extends MachinePrototype {
+export default class RootMachine extends MachinePrototype {
   sockets = [
     {
       id: 0,
-      title: "A",
+      title: "X",
+      typeID: UUID.FromString("7690b191-7157-427e-9841-8f3576306e5b"),
+      type: SocketType.Input,
+    },
+    {
+      id: 0,
+      title: "n",
       typeID: UUID.FromString("7690b191-7157-427e-9841-8f3576306e5b"),
       type: SocketType.Input,
     },
     {
       id: 1,
-      title: "B",
-      typeID: UUID.FromString("7690b191-7157-427e-9841-8f3576306e5b"),
-      type: SocketType.Input,
-    },
-    {
-      id: 2,
-      title: "A+B",
+      title: "n√X",
       typeID: UUID.FromString("7690b191-7157-427e-9841-8f3576306e5b"),
       type: SocketType.Output,
     },
   ];
 
-  id = UUID.FromString("ae5eb614-a1ee-4382-9b09-c4a5e9c296a7");
-  name = "Суммирование";
+  id = UUID.FromString("91d2ee8e-31e9-423d-b7b0-2dc5005a4712");
+  name = "Получить корень в степени";
   title = "";
 
   async invoke(self: Machine, props: RecordData[]) {
@@ -37,7 +37,7 @@ export default class AdditionMachine extends MachinePrototype {
     return {
       fields: [],
       type: numT,
-      value: props[0].value + props[1].value,
+      value: Math.pow(props[0].value, 1/props[1].value),
     } as RecordData;
   }
 }
