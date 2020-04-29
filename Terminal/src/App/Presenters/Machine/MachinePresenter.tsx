@@ -5,28 +5,32 @@ import Machine from "./Machine";
 import SocketType from "../../Models/SocketType";
 import SocketPresenter from "../Socket/SocketPresenter";
 import Block from "./Block";
+import { useStores } from "../../../Hooks/useStores";
 
 export default ({ state }: { state: Machine }) => {
+  const { appStore } = useStores();
+
   function Spacer({ style }: { style: any }) {
     return (
       <div
         style={{
           ...style,
           backgroundColor: state.color,
-          flex: 1
+          flex: 1,
         }}
       />
     );
   }
 
-  const inputSockets = state.sockets.filter(p => p.type === SocketType.Input);
-  const outputSockets = state.sockets.filter(p => p.type === SocketType.Output);
+  const allSockets = [...state.sockets, ...state.dynamicSockets];
+  const inputSockets = allSockets.filter((p) => p.type === SocketType.Input);
+  const outputSockets = allSockets.filter((p) => p.type === SocketType.Output);
 
   return useObserver(() => (
     <Block state={state}>
       <DocksLine>
         <Spacer style={{}} />
-        {inputSockets.map(i => (
+        {inputSockets.map((i) => (
           <SocketPresenter key={i.id} state={i} />
         ))}
         <Spacer style={{}} />
@@ -35,22 +39,22 @@ export default ({ state }: { state: Machine }) => {
         style={{
           width: inputSockets.length ? 10 : 0,
           paddingTop: 4,
-          paddingBottom: 4
+          paddingBottom: 4,
         }}
       />
       <ContentContainer style={{ backgroundColor: state.color }}>
-        {state.proto.content(state)}
+        {state.proto.content(state, appStore)}
       </ContentContainer>
       <Spacer
         style={{
           width: outputSockets.length ? 10 : 0,
           paddingTop: 4,
-          paddingBottom: 4
+          paddingBottom: 4,
         }}
       />
       <DocksLine>
         <Spacer style={{}} />
-        {outputSockets.map(i => (
+        {outputSockets.map((i) => (
           <SocketPresenter key={i.id} state={i} />
         ))}
         <Spacer style={{}} />

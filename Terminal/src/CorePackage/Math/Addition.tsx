@@ -29,15 +29,17 @@ export default class AdditionMachine extends MachinePrototype {
   ];
 
   id = UUID.FromString("ae5eb614-a1ee-4382-9b09-c4a5e9c296a7");
-  name = "Суммирование";
-  title = "";
+  name = "Сложить";
+  title = "Сложить";
 
   async invoke(self: Machine, props: RecordData[]) {
     var numT = props[0].type;
-    return {
-      fields: [],
-      type: numT,
-      value: props[0].value + props[1].value,
-    } as RecordData;
+    return [
+      {
+        fields: [],
+        type: numT,
+        value: props[0].value + props[1].value,
+      },
+    ];
   }
 }

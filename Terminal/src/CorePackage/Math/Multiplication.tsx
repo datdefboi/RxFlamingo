@@ -29,15 +29,15 @@ export default class MultiplicationMachine extends MachinePrototype {
   ];
 
   id = UUID.FromString("431007ea-7593-4745-b7a8-08f2b92f45cf");
-  name = "Умножение";
+  name = "Умножить";
   title = "";
 
   async invoke(self: Machine, props: RecordData[]) {
     var numT = props[0].type;
-    return {
+    return [{
       fields: [],
       type: numT,
       value: props[0].value * props[1].value,
-    } as RecordData;
+    }];
   }
 }

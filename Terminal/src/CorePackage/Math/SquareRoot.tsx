@@ -28,10 +28,12 @@ export default class SquareRootMachine extends MachinePrototype {
 
   async invoke(self: Machine, props: RecordData[]) {
     var numT = props[0].type;
-    return {
-      fields: [],
-      type: numT,
-      value: Math.sqrt(props[0].value),
-    } as RecordData;
+    return [
+      {
+        fields: [],
+        type: numT,
+        value: Math.sqrt(props[0].value),
+      },
+    ];
   }
 }

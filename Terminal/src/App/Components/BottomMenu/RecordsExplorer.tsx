@@ -9,6 +9,7 @@ import CardOutlineIcon from "mdi-react/CardOutlineIcon";
 import ContentSaveIcon from "mdi-react/ContentSaveIcon";
 import UUID from "../../../shared/UUID";
 import RemoveIcon from "mdi-react/RemoveIcon";
+import RecordTypePicker from "../Menus/RecordTypePicker";
 
 export default function RecordsExplorer(props: any) {
   const { appStore } = useStores();
@@ -19,6 +20,7 @@ export default function RecordsExplorer(props: any) {
       buildinRepresentation: "none",
       fields: [],
       id: UUID.Generate(),
+
       defaultValue: null,
       isRenames: true,
       name: "new record",
@@ -74,9 +76,16 @@ export default function RecordsExplorer(props: any) {
           size={16}
         />
         {!r.isRenames ? (
-          <RecordTitle onClick={() => (r.isRenames = true)}>
-            {r.name}
-          </RecordTitle>
+          <>
+            <RecordTitle onClick={() => (r.isRenames = true)}>
+              {r.name}
+            </RecordTitle>
+            <div style={{ paddingLeft: 8, color: "cornflowerblue", paddingRight: 8 }}> типа </div>
+            <RecordTypePicker
+              recordType={r.type}
+              recordTypeChanged={(type) => (r.type = type)}
+            />
+          </>
         ) : (
           <>
             <RecordRenameField
@@ -114,7 +123,7 @@ export default function RecordsExplorer(props: any) {
         ))}
         {appStore.loadedPackages.map((p) =>
           p.records.map((r) => (
-            <RecordGroup>
+            <RecordGroup  key={r.name+p.name}>
               {RenderRecord(r)}
               {r.fields.map((f) => RenderField(f))}
             </RecordGroup>
@@ -163,6 +172,6 @@ const Title = styled.div`
   align-items: center;
   display: flex;
   font-family: Consolas;
-  border-bottom: 1px dotted #575757;
+  border-bottom: 1px solid #575757;
   padding: 8px;
 `;

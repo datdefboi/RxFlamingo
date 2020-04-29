@@ -11,7 +11,7 @@ export default function RecordTypePicker({
   recordType,
   recordTypeChanged,
 }: {
-  recordType: RecordType;
+  recordType: RecordType | null;
   recordTypeChanged: (record: RecordType) => void;
 }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -27,7 +27,14 @@ export default function RecordTypePicker({
         <Card onMouseDown={(ev) => ev.stopPropagation()}>
           <CloseButton onClick={() => setIsVisible(false)}>Скрыть</CloseButton>
           {pkg.records.map((r) => (
-            <RecordItem>{r.name}</RecordItem>
+            <RecordItem
+              onClick={() => {
+                recordTypeChanged(r);
+                setIsVisible(false);
+              }}
+            >
+              {r.name}
+            </RecordItem>
           ))}
           {appStore.loadedPackages.map((p) =>
             p.records.map((r) => (
@@ -48,7 +55,7 @@ export default function RecordTypePicker({
 }
 
 const TypeTitle = styled.div`
-  font-size: 14px;
+  font-size: 12px;
 `;
 
 const CloseButton = styled.div`

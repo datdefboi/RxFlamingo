@@ -7,6 +7,8 @@ import RecordType from "../../Models/RecordType";
 import { useStores } from "../../../Hooks/useStores";
 import Package from "../../Models/Package";
 import AppStore from "../../../AppRoot/stores/AppStore";
+import Wire from "../Wire/Wire";
+import UUID from "../../../shared/UUID";
 
 export default class Socket {
   @observable title: string = "";
@@ -16,8 +18,10 @@ export default class Socket {
   @observable isDocked: boolean = false;
   @observable recordType: RecordType | null = null;
 
+  currentWire: Wire | null = null;
+
   constructor(proto: SocketPrototype, appStore: AppStore, machine: Machine) {
-    const rt = appStore.loadedPackages
+    const rt = [...appStore.loadedPackages, appStore.currentPackage]
       .reduce(
         (p: RecordType[], c: Package) => [...p, ...c.records],
         [] as RecordType[]

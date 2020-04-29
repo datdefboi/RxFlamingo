@@ -14,11 +14,19 @@ export default class Machine {
   @observable id: UUID = UUID.Empty;
   @observable position: Point = Point.Zero;
   @observable sockets: Socket[] = [];
+  @observable dynamicSockets: Socket[] = [];
   @observable proto: MachinePrototype;
   @observable wires: Wire[] = [];
   @observable cacheOut = false;
   @observable state: any;
   color: string = "black";
+
+  detachWires(
+    appStore: AppStore,
+    predicate: (wire: Wire) => boolean = () => true
+  ) {
+    for (var w of this.wires.filter(predicate)) appStore.removeWire(w);
+  }
 
   async playCurrent() {
     await new Promise(async (resolve, reject) => {
@@ -45,8 +53,9 @@ export default class Machine {
       );
 
       const propagationQueue = [];
+      let i = 0;
       for (var wire of targetWires) {
-        wire.bufferQueue = result; // TODO
+        wire.bufferQueue = result![i++]; // TODO
         if (wire.executionRequested == false)
           propagationQueue.push(wire.toSocket?.machine.playCurrent());
         else wire.executionRequested = false;
@@ -60,6 +69,7 @@ export default class Machine {
     this.proto = proto;
     this.state = { ...proto.initShape };
     this.sockets = proto.sockets.map((p) => new Socket(p, appStore, this));
+    this.dynamicSockets = [];
     this.id = UUID.Generate();
   }
 

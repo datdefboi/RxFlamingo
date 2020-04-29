@@ -44,13 +44,17 @@ export default ({ state }: { state: Socket }) => {
     };
   }); // mouse handlers
 
+  function isWirable(wire: Wire | null) {
+    return (
+      wire &&
+      wire?.fromSocket?.type !== state.type &&
+      (wire.fromSocket?.recordType === state.recordType ||
+        state.recordType === null)
+    );
+  }
+
   const MouseEnter = () => {
-    if (
-      !factory.linkerWire ||
-      (factory.linkerWire?.fromSocket?.type !== state.type &&
-        factory.linkerWire.fromSocket?.recordType === state.recordType)
-    )
-      setIsHover(true);
+    if (isWirable(factory.linkerWire)) setIsHover(true);
   };
 
   const MouseLeave = () => {
@@ -59,26 +63,38 @@ export default ({ state }: { state: Socket }) => {
   };
 
   const TryMakeWire = () => {
-    if (
-      factory.linkerWire &&
-      factory.linkerWire?.fromSocket?.type !== state.type &&
-      factory.linkerWire.fromSocket?.recordType === state.recordType
-    ) {
+    if (isWirable(factory.linkerWire)) {
       const wire = factory.linkerWire;
+      if (wire == null) return;
+
       factory.linkerWire = null;
+
       wire.toSocket = state;
-      wire.fromSocket!.isDocked = true;
+      const to = wire.toSocket;
+
+      to.currentWire = wire;
+
+      const from = wire.fromSocket;
+
+      from!.isDocked = true;
+      from!.currentWire = wire;
+
       state.isDocked = true;
-      wire.fromSocket?.machine.wires.push(wire);
+
+      from?.machine.wires.push(wire);
       state.machine.wires.push(wire);
+
+      from?.machine.proto.onWireConnected(appStore, from.machine, wire);
+      to?.machine.proto.onWireConnected(appStore, to.machine, wire);
     }
   };
 
   const TryBeginLinking = (ev: React.MouseEvent) => {
-    if (ev.button === 0 && !state.isDocked) {
-      console.error("stop");
+    ev.stopPropagation();
+    if (ev.button === 0) {
       const x = ev.clientX;
       const y = ev.clientY;
+
       const virtualSocket = new Socket(
         {
           type: state.type,
@@ -89,8 +105,22 @@ export default ({ state }: { state: Socket }) => {
         appStore,
         state.machine
       );
+
       virtualSocket.getPositionAction = () => new Point(x, y);
-      factory!.linkerWire = new Wire(state, virtualSocket);
+
+      if (!state.isDocked) {
+        if (state.type === SocketType.Output)
+          factory!.linkerWire = new Wire(state, virtualSocket);
+        else factory!.linkerWire = new Wire(virtualSocket, state);
+      } else {
+        const wire = state.currentWire;
+        appStore.removeWire(wire);
+
+        factory!.linkerWire = new Wire(
+          wire!.toSocket === state ? wire!.fromSocket : wire!.toSocket,
+          virtualSocket
+        );
+      }
     }
   };
 
@@ -139,6 +169,7 @@ export default ({ state }: { state: Socket }) => {
   );
 
   const categoryColor = state.machine.color;
+  console.log(state.title, categoryColor);
 
   return (
     <>
@@ -154,7 +185,9 @@ export default ({ state }: { state: Socket }) => {
             }}
           >
             {state.title}
+            <LabelTypeAnnotation>{state.recordType?.name}</LabelTypeAnnotation>
           </Label>
+
           <svg
             style={{ position: "relative" }}
             width="20"
@@ -201,24 +234,35 @@ export default ({ state }: { state: Socket }) => {
               fill={categoryColor}
             />
           </svg>
-          <Label style={{ marginLeft: -8 }}>{state.title}</Label>
+          <Label style={{ marginLeft: -8, backgroundColor: categoryColor }}>
+            {state.title}
+            <LabelTypeAnnotation>{state.recordType?.name}</LabelTypeAnnotation>
+          </Label>
         </Container>
       )}
     </>
   );
 };
 
-const Label = styled.span`
+const LabelTypeAnnotation = styled.div`
+  font-size: 8px;
+  color: gray;
+`;
+
+const Label = styled.div`
   display: flex;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   white-space: nowrap;
   align-items: center;
   color: white;
   font-family: Arial;
-  font-size: 12px;
+  font-size: 10px;
 `;
+
 const Container = styled.div`
   display: flex;
-  height: 22px;
   user-select: none;
 `;

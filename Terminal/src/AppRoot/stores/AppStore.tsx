@@ -7,7 +7,7 @@ import Machine from "../../App/Presenters/Machine/Machine";
 import MachineCategory from "../../App/Models/MachineCategory";
 import MachinePrototype from "../../App/Models/MachinePrototype";
 import AdditionMachine from "../../CorePackage/Math/Addition";
-import TextLog from "../../CorePackage/Monitoring/TextLog";
+import TextLog from "../../CorePackage/Widgets/TextLog";
 import RecordType from "../../App/Models/RecordType";
 import Package from "../../App/Models/Package";
 import FlowCategory from "../../CorePackage/Core/FlowCategory";
@@ -16,6 +16,11 @@ import { ContextMenuState } from "../../Hooks/useContextMenu";
 import MultiplicationMachine from "../../CorePackage/Math/Multiplication";
 import SquareRootMachine from "../../CorePackage/Math/SquareRoot";
 import RootMachine from "../../CorePackage/Math/Root";
+import Slider from "../../CorePackage/Widgets/Slider";
+import Wire from "../../App/Presenters/Wire/Wire";
+import Constructor from "../../CorePackage/Core/Constructor";
+import Destructor from "../../CorePackage/Core/Destructor";
+import Merge from "../../CorePackage/Core/Merge";
 
 export default class AppStore {
   @observable machinePrototypes: MachinePrototype[] = [];
@@ -31,6 +36,31 @@ export default class AppStore {
     inst.color = color;
     inst.setPosition(pos);
     this.currentFactory.instances.push(inst);
+  }
+
+  @action removeWire(wire: Wire | null) {
+    wire?.fromSocket!.machine.wires.splice(
+      wire?.fromSocket!.machine.wires.indexOf(wire as any),
+      1
+    );
+    wire?.toSocket!.machine.wires.splice(
+      wire?.toSocket!.machine.wires.indexOf(wire as any),
+      1
+    );
+    wire!.toSocket!.isDocked = false;
+    wire!.toSocket!.currentWire = null;
+    wire!.fromSocket!.isDocked = false;
+    wire!.fromSocket!.currentWire = null;
+  }
+
+  @action removeInstance(inst: Machine) {
+    for (const wire of inst.wires) {
+      this.removeWire(wire);
+    }
+    this.currentFactory.instances.splice(
+      this.currentFactory.instances.indexOf(inst),
+      1
+    );
   }
 
   @action initDefaultPackages() {
@@ -60,20 +90,25 @@ export default class AppStore {
     const flow = {
       color: "#4c3342",
       factories: [],
-      machinePrototypes: [new Constant()],
+      machinePrototypes: [
+        new Constant(),
+        new Merge(),
+        new Constructor(),
+        new Destructor(),
+      ],
       name: "Управление",
       records: [],
     } as Package;
 
-    const monitoring = {
+    const widgets = {
       color: "#4f3732",
       factories: [],
-      machinePrototypes: [new TextLog()],
-      name: "Журналирование",
+      machinePrototypes: [new TextLog(), new Slider()],
+      name: "Виджеты",
       records: [],
     } as Package;
 
-    this.loadedPackages.push(math, flow, monitoring);
+    this.loadedPackages.push(math, flow, widgets);
   }
 
   @action initValues() {

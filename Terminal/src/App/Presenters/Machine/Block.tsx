@@ -17,6 +17,7 @@ import ChevronDoubleRightIcon from "mdi-react/ChevronDoubleRightIcon";
 import PlayIcon from "mdi-react/PlayIcon";
 import ContentSaveOutlineIcon from "mdi-react/ContentSaveOutlineIcon";
 import ContentSaveMoveIcon from "mdi-react/ContentSaveMoveIcon";
+import TrashIcon from "mdi-react/TrashCanIcon";
 
 export default function BlockPresenter({
   state,
@@ -33,15 +34,14 @@ export default function BlockPresenter({
 
   useEffect(() => {
     window.addEventListener("mousemove", OnGlobalMouseMove);
-    window.addEventListener("mouseup", OnGlobalMouseUp);
     return () => {
       window.removeEventListener("mousemove", OnGlobalMouseMove);
-      window.removeEventListener("mouseup", OnGlobalMouseUp);
     };
   }); // mouse handlers
 
-  function OnGlobalMouseUp(ev: MouseEvent) {
+  function OnGlobalMouseUp() {
     setIsDrag(false);
+    console.log("mouse up");
   }
 
   function OnMouseDown(mEvent: React.MouseEvent) {
@@ -58,7 +58,6 @@ export default function BlockPresenter({
 
   function OnGlobalMouseMove(ev: MouseEvent) {
     if (isDrag) {
-      console.error(isDrag);
       state.setPosition(
         new Point(ev.clientX - dragOffset!.x, ev.clientY - dragOffset!.y)
       );
@@ -68,12 +67,22 @@ export default function BlockPresenter({
   const barStyle = { backgroundColor: state.color };
   //chevron-triple-right step-forward-2 content-save-move content-save-outline
   return useObserver(() => (
-    <BlockContainer onMouseDown={OnMouseDown} ref={ref}>
+    <BlockContainer
+      onMouseUp={OnGlobalMouseUp}
+      onMouseDown={OnMouseDown}
+      ref={ref}
+    >
       <TopBar style={barStyle}>{state.proto?.title}</TopBar>
       <DocksContainer>{children}</DocksContainer>
-      <BottomBar onMouseDown={(ev)=>ev.stopPropagation()} style={barStyle}>
-        {state.proto.isInvocable ? (
-          <>
+      <BottomBar  style={barStyle}>
+        {/* state.proto.isInvocable */ true ? (
+          <div onMouseDown={(ev) => ev.stopPropagation()}>
+            <TrashIcon
+              onClick={(ev) => {
+                appStore.removeInstance(state);
+              }}
+              size={16}
+            />
             {state.cacheOut ? (
               <ContentSaveMoveIcon
                 onClick={() => (state.cacheOut = false)}
@@ -95,7 +104,7 @@ export default function BlockPresenter({
               size={16}
             />
             <ChevronDoubleRightIcon size={16} />
-          </>
+          </div>
         ) : null}
       </BottomBar>
     </BlockContainer>
@@ -140,7 +149,7 @@ const BottomBar = styled(Bar)`
   padding: 4px;
   color: gray;
 
-  > *:hover {
+  > div *:hover {
     color: white;
   }
 `;

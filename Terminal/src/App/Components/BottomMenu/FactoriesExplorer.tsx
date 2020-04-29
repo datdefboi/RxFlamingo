@@ -9,6 +9,7 @@ import CardOutlineIcon from "mdi-react/CardOutlineIcon";
 import ContentSaveIcon from "mdi-react/ContentSaveIcon";
 import UUID from "../../../shared/UUID";
 import RemoveIcon from "mdi-react/RemoveIcon";
+import RecordTypePicker from "../Menus/RecordTypePicker";
 
 export default function FactoriesExplorer(props: any) {
   const { appStore } = useStores();
@@ -72,9 +73,15 @@ export default function FactoriesExplorer(props: any) {
           size={16}
         />
         {!r.isRenames ? (
-          <RecordTitle onClick={() => (r.isRenames = true)}>
-            {r.name}
-          </RecordTitle>
+          <>
+            <RecordTitle onClick={() => (r.isRenames = true)}>
+              {r.name}
+            </RecordTitle>
+            <RecordTypePicker
+              recordType={r.type}
+              recordTypeChanged={(type) => (r.type = type)}
+            />
+          </>
         ) : (
           <>
             <RecordRenameField

@@ -34,10 +34,10 @@ export default class RootMachine extends MachinePrototype {
 
   async invoke(self: Machine, props: RecordData[]) {
     var numT = props[0].type;
-    return {
+    return [{
       fields: [],
       type: numT,
       value: Math.pow(props[0].value, 1/props[1].value),
-    } as RecordData;
+    } ];
   }
 }

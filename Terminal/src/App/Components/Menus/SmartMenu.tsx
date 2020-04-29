@@ -22,10 +22,10 @@ export default function SmartMenu({
         return <NumericIcon size={24} />;
       case "Управление":
         return <ArrowDecisionOutlineIcon size={24} />;
-      case "Журналирование":
+      case "Виджеты":
         return <ViewDashboardOutlineIcon size={24} />;
       default:
-        return <PackageVariantClosedIcon size={24} />;
+    return <div>{name}</div>;
     }
   }
 
