@@ -70,7 +70,7 @@ export default ({ state }: { state: Wire }) =>
     const offsetY = -leftTopBound.y + dockSize.height / 2;
     const offsetX = -leftTopBound.x + dockSize.width;
 
-    function RenderLeftDock(pos: Point) {
+    function RenderRightDock(pos: Point) {
       return (
         <path
           transform={`translate(${pos.x -
@@ -83,7 +83,7 @@ export default ({ state }: { state: Wire }) =>
       );
     }
 
-    function RenderRightDock(pos: Point) {
+    function RenderLeftDock(pos: Point) {
       return (
         <path
           transform={`translate(${pos.x - leftTopBound.x + 1},${pos.y +
@@ -104,7 +104,7 @@ export default ({ state }: { state: Wire }) =>
           cursor: "crosshair",
           zIndex: 2,
           position: "absolute",
-          transform: transition
+          transform: transition,
         }}
         viewBox={`0 0 ${width} ${height}`}
       >
@@ -118,12 +118,8 @@ export default ({ state }: { state: Wire }) =>
           fill="transparent"
         />
 
-        {isInput ? RenderLeftDock(fromPoint) : RenderRightDock(fromPoint)}
-        {state.toSocket!.isDocked
-          ? isInput
-            ? RenderRightDock(toPoint)
-            : RenderLeftDock(toPoint)
-          : null}
+        {RenderLeftDock(fromPoint)}
+        {state.toSocket!.isDocked ? RenderRightDock(toPoint) : null}
       </svg>
     );
   });

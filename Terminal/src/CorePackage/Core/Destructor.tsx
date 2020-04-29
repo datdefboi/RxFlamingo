@@ -37,7 +37,7 @@ export default class Destructor extends MachinePrototype {
 
   onWireConnected(appStore: AppStore, self: Machine, wire: Wire) {
     const t = wire.fromSocket?.recordType;
-    if()
+    
     self.detachWires(
       appStore,
       (w) =>

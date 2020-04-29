@@ -96,8 +96,11 @@ export default ({ state }: { state: Socket }) => {
       const y = ev.clientY;
 
       const virtualSocket = new Socket(
-        {
-          type: state.type,
+        {'56252626+'
+          type:
+            state.type == SocketType.Input
+              ? SocketType.Output
+              : SocketType.Input,
           title: "",
           typeID: state.recordType?.id ?? UUID.Empty,
           id: 0,
@@ -109,17 +112,20 @@ export default ({ state }: { state: Socket }) => {
       virtualSocket.getPositionAction = () => new Point(x, y);
 
       if (!state.isDocked) {
-        if (state.type === SocketType.Output)
+        if (state.type === SocketType.Output) {
           factory!.linkerWire = new Wire(state, virtualSocket);
-        else factory!.linkerWire = new Wire(virtualSocket, state);
+        } else {
+          factory!.linkerWire = new Wire(virtualSocket, state);
+        }
       } else {
         const wire = state.currentWire;
         appStore.removeWire(wire);
 
-        factory!.linkerWire = new Wire(
-          wire!.toSocket === state ? wire!.fromSocket : wire!.toSocket,
-          virtualSocket
-        );
+        if (state.type === SocketType.Output) {
+          factory!.linkerWire = new Wire(state, virtualSocket);
+        } else {
+          factory!.linkerWire = new Wire(virtualSocket, state);
+        }
       }
     }
   };
