@@ -4,71 +4,111 @@ import Socket from "../Socket/Socket";
 import { useStores } from "../../../Hooks/useStores";
 import Point from "../../../shared/Point";
 import UUID from "../../../shared/UUID";
-import MachineCategory from "../../Models/MachineCategory";
-import SocketPrototype from "../../Models/SocketPrototype";
-import MachinePrototype from "../../Models/MachinePrototype";
+import SocketPrototype from "../../Models/document/SocketPrototype";
+import MachinePrototype from "../../Models/document/MachinePrototype";
 import Wire from "../Wire/Wire";
 import AppStore from "../../../AppRoot/stores/AppStore";
+import { stores } from "../../../AppRoot/App";
+import RecordData from "../../Models/execution/RecordData";
 
-export default class Machine {
+export default class Machine<StateT> {
   @observable id: UUID = UUID.Empty;
   @observable position: Point = Point.Zero;
   @observable sockets: Socket[] = [];
   @observable dynamicSockets: Socket[] = [];
-  @observable proto: MachinePrototype;
+  @observable proto: MachinePrototype<StateT>;
   @observable wires: Wire[] = [];
-  @observable cacheOut = false;
-  @observable state: any;
+  @observable state: StateT;
+
+  cache: RecordData[][] | null = null;
+  isConsumationPending = false;
+
   color: string = "black";
 
-  detachWires(
-    appStore: AppStore,
-    predicate: (wire: Wire) => boolean = () => true
-  ) {
-    for (var w of this.wires.filter(predicate)) appStore.removeWire(w);
+  detachWires(predicate: (wire: Wire) => boolean = () => true) {
+    for (var w of this.wires.filter(predicate)) stores.appStore.removeWire(w);
   }
 
-  async playCurrent() {
-    await new Promise(async (resolve, reject) => {
-      const deps = [];
-      const depsWires = this.wires.filter((p) => p.toSocket?.machine === this);
-      for (var dep of depsWires) {
-        var data = dep.bufferQueue;
-        dep.executionRequested = true;
-        if (!data) deps.push(dep.fromSocket?.machine.playCurrent());
+  async consume(selfReq: boolean) {
+    console.log("consume start", this.proto.title);
+    const unresolvedDepsQ = [];
+    const depsWires = this.wires.filter((p) => p.toSocket?.machine === this);
+
+    /* const pendingRays = new Set<UUID>();
+    for (var dep of depsWires)
+      if (dep.data) dep.rays.forEach((r) => pendingRays.add(r)); */
+
+    const inputs = [] as RecordData[][];
+
+    for (var dep of depsWires) {
+      const data = dep.data;
+      if (!data) unresolvedDepsQ.push(dep.fromSocket?.machine);
+      else {
+        inputs.push(data);
+        dep.data = null;
       }
+    }
 
-      await Promise.all(deps);
-      var props = depsWires.map((p) => {
-        const t = p.bufferQueue;
-        p.bufferQueue = null;
-        return t;
-      });
+    this.cache = null;
 
-      var result = await this.proto.invoke(this, props);
-      console.info("invocation of ", this.id.toString(), "=", result);
+    if (!selfReq) this.isConsumationPending = false;
 
-      const targetWires = this.wires.filter(
-        (p) => p.fromSocket?.machine === this
-      );
+    if (unresolvedDepsQ.length) {
+      unresolvedDepsQ.map((d) => d?.produce());
+      return;
+    }
 
-      const propagationQueue = [];
-      let i = 0;
-      for (var wire of targetWires) {
-        wire.bufferQueue = result![i++]; // TODO
-        if (wire.executionRequested == false)
-          propagationQueue.push(wire.toSocket?.machine.playCurrent());
-        else wire.executionRequested = false;
-      }
-      await Promise.all(propagationQueue);
-      resolve();
-    });
+    let res: RecordData[][];
+    if (this.proto.isPerSetInvocable) {
+      res = [];
+      const indexes = [inputs.map((p) => 0)];
+      let is
+    } else {
+      res = await this.proto.invoke(this, inputs);
+    }
+    this.isConsumationPending = false;
+
+    this.cache = res;
+    if (!selfReq) await this.produce();
   }
 
-  constructor(proto: MachinePrototype, appStore: AppStore) {
+  async produce() {
+    if (!this.cache) {
+      await this.consume(true);
+    }
+
+    const consumers = this.wires.filter((p) => p.fromSocket?.machine === this);
+
+    const machinesFilled = [] as Machine<any>[];
+    let i = 0;
+
+    /*  const rays = new Set<UUID>(); */
+    /*  for (var wire of consumers) { */
+    /*    wire.rays.forEach((r) => rays.add(r)); */
+    /*  } */
+    /*  if (rays.size === 0) rays.add(UUID.Generate()); */
+
+    for (var wire of consumers) {
+      const val = this.cache![wire.fromSocket!.id];
+      if (wire.data) continue;
+      wire.data = val;
+
+      wire.toSocket!.machine.isConsumationPending = true;
+      /*  wire.rays = rays; */
+
+      const propTo = wire.toSocket?.machine!;
+
+      if (!machinesFilled.includes(propTo)) machinesFilled.push(propTo);
+    }
+    machinesFilled.map((c) =>
+      c.isConsumationPending ? c.consume(false) : null
+    );
+  }
+
+  constructor(proto: MachinePrototype<StateT>, appStore: AppStore) {
     this.proto = proto;
-    this.state = { ...proto.initShape };
-    this.sockets = proto.sockets.map((p) => new Socket(p, appStore, this));
+    this.state = Object.assign({}, proto.initShape);
+    this.sockets = proto.sockets.map((p) => new Socket(p, this));
     this.dynamicSockets = [];
     this.id = UUID.Generate();
   }

@@ -1,24 +1,30 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useStores } from "../../../Hooks/useStores";
-import MachineCategory from "../../Models/MachineCategory";
 import ContextMenuContentProps from "../ContextMenu/ContextMenuContentProps";
-import RecordType from "../../Models/RecordType";
+import RecordType from "../../Models/document/RecordType";
 import ContextMenu from "../ContextMenu/ContextMenu";
 import Point from "../../../shared/Point";
+import UUID from "../../../shared/UUID";
+import { useObserver } from "mobx-react-lite";
 
 export default function RecordTypePicker({
-  recordType,
-  recordTypeChanged,
+  recordID,
+  recordIDChanged,
 }: {
-  recordType: RecordType | null;
-  recordTypeChanged: (record: RecordType) => void;
+  recordID: UUID;
+  recordIDChanged: (record: UUID) => void;
 }) {
   const [isVisible, setIsVisible] = useState(false);
   const { appStore } = useStores();
   const pkg = appStore.currentPackage;
 
-  return (
+  const [recordType, setRecordType] = useState(
+    appStore.findRecordTypeByID(recordID)
+  );
+  console.log(recordID)
+
+  return useObserver(() => (
     <>
       <TypeTitle onMouseDown={(ev) => setIsVisible(true)}>
         {recordType ? recordType.name : "Не выбрано"}
@@ -29,7 +35,8 @@ export default function RecordTypePicker({
           {pkg.records.map((r) => (
             <RecordItem
               onClick={() => {
-                recordTypeChanged(r);
+                recordIDChanged(r.id);
+                setRecordType(r);
                 setIsVisible(false);
               }}
             >
@@ -40,7 +47,8 @@ export default function RecordTypePicker({
             p.records.map((r) => (
               <RecordItem
                 onClick={() => {
-                  recordTypeChanged(r);
+                  recordIDChanged(r.id);
+                  setRecordType(r);
                   setIsVisible(false);
                 }}
               >
@@ -51,7 +59,7 @@ export default function RecordTypePicker({
         </Card>
       ) : null}
     </>
-  );
+  ));
 }
 
 const TypeTitle = styled.div`

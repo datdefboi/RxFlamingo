@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import SocketType from "../../Models/SocketType";
+import SocketType from "../../Models/document/SocketType";
 import { useStores } from "../../../Hooks/useStores";
 import Point from "../../../shared/Point";
 import Wire from "../Wire/Wire";
@@ -7,6 +7,7 @@ import Socket from "./Socket";
 import useGlobalTheme from "../../../Hooks/useGlobalTheme";
 import styled from "styled-components";
 import UUID from "../../../shared/UUID";
+import { stores } from "../../../AppRoot/App";
 
 export default ({ state }: { state: Socket }) => {
   const [isHover, setIsHover] = useState(false);
@@ -44,59 +45,62 @@ export default ({ state }: { state: Socket }) => {
     };
   }); // mouse handlers
 
-  function isWirable(wire: Wire | null) {
+  function isLinkable(wire: Wire | null) {
     return (
       wire &&
-      wire?.fromSocket?.type !== state.type &&
-      (wire.fromSocket?.recordType === state.recordType ||
-        state.recordType === null)
+      (wire.toSocket?.recordType === state.recordType ||
+        wire.fromSocket?.recordType === state.recordType ||
+        state.recordType === stores.appStore.findRecordTypeByID(UUID.Empty))
     );
   }
 
   const MouseEnter = () => {
-    if (isWirable(factory.linkerWire)) setIsHover(true);
+    if (isLinkable(factory.linkerWire)) setIsHover(true);
   };
 
   const MouseLeave = () => {
-    console.log("leave");
     setIsHover(false);
   };
 
   const TryMakeWire = () => {
-    if (isWirable(factory.linkerWire)) {
+    if (isLinkable(factory.linkerWire)) {
       const wire = factory.linkerWire;
       if (wire == null) return;
 
       factory.linkerWire = null;
 
-      wire.toSocket = state;
-      const to = wire.toSocket;
+      let real = null;
 
-      to.currentWire = wire;
+      if (wire.toSocket?.isVirtual) {
+        wire.toSocket = state;
+        real = wire.fromSocket;
+      } else {
+        wire.fromSocket = state;
+        real = wire.toSocket;
+      }
 
-      const from = wire.fromSocket;
+      state!.currentWire = wire;
+      state!.machine = state.machine;
+      state!.isVirtual = false;
 
-      from!.isDocked = true;
-      from!.currentWire = wire;
+      real!.isDocked = true;
+      real!.currentWire = wire;
 
-      state.isDocked = true;
+      state!.isDocked = true;
 
-      from?.machine.wires.push(wire);
-      state.machine.wires.push(wire);
+      real!.machine.wires.push(wire);
+      state!.machine.wires.push(wire);
 
-      from?.machine.proto.onWireConnected(appStore, from.machine, wire);
-      to?.machine.proto.onWireConnected(appStore, to.machine, wire);
+      real?.machine.proto.onWireConnected(real.machine, wire);
+      state?.machine.proto.onWireConnected(state.machine, wire);
     }
   };
 
   const TryBeginLinking = (ev: React.MouseEvent) => {
     ev.stopPropagation();
     if (ev.button === 0) {
-      const x = ev.clientX;
-      const y = ev.clientY;
-
       const virtualSocket = new Socket(
-        {'56252626+'
+        {
           type:
             state.type == SocketType.Input
               ? SocketType.Output
@@ -104,12 +108,15 @@ export default ({ state }: { state: Socket }) => {
           title: "",
           typeID: state.recordType?.id ?? UUID.Empty,
           id: 0,
+          showTypeAnnotation: false,
         },
-        appStore,
-        state.machine
+        state.machine,
+        true
       );
 
-      virtualSocket.getPositionAction = () => new Point(x, y);
+      ev.persist();
+      virtualSocket.getPositionAction = () =>
+        new Point(+ev.clientX, +ev.clientY);
 
       if (!state.isDocked) {
         if (state.type === SocketType.Output) {
@@ -119,12 +126,16 @@ export default ({ state }: { state: Socket }) => {
         }
       } else {
         const wire = state.currentWire;
-        appStore.removeWire(wire);
+        const real =
+          state.type == SocketType.Input ? wire!.fromSocket : wire!.toSocket;
 
-        if (state.type === SocketType.Output) {
-          factory!.linkerWire = new Wire(state, virtualSocket);
+        appStore.removeWire(wire);
+        virtualSocket.type = state.type;
+
+        if (state.type === SocketType.Input) {
+          factory!.linkerWire = new Wire(real, virtualSocket);
         } else {
-          factory!.linkerWire = new Wire(virtualSocket, state);
+          factory!.linkerWire = new Wire(virtualSocket, real);
         }
       }
     }
@@ -132,10 +143,14 @@ export default ({ state }: { state: Socket }) => {
 
   const TrackMouseMove = (ev: MouseEvent) => {
     if (factory.linkerWire) {
-      const x = ev.x;
-      const y = ev.y;
-      factory.linkerWire!.toSocket!.getPositionAction = () =>
-        new Point(x, y).sub(factory.viewOffset);
+      var setter = function() {
+        return new Point(ev.clientX, ev.clientY).sub(factory.viewOffset);
+      };
+      if (factory.linkerWire.toSocket?.isVirtual) {
+        factory.linkerWire!.toSocket!.getPositionAction = setter;
+      } else {
+        factory.linkerWire!.fromSocket!.getPositionAction = setter;
+      }
     }
   };
 
@@ -175,8 +190,6 @@ export default ({ state }: { state: Socket }) => {
   );
 
   const categoryColor = state.machine.color;
-  console.log(state.title, categoryColor);
-
   return (
     <>
       {/* {isLinking ? <WireInst /> : null}*/}
@@ -191,7 +204,11 @@ export default ({ state }: { state: Socket }) => {
             }}
           >
             {state.title}
-            <LabelTypeAnnotation>{state.recordType?.name}</LabelTypeAnnotation>
+            {state.showAnnotation ? (
+              <LabelTypeAnnotation>
+                {state.recordType?.name}
+              </LabelTypeAnnotation>
+            ) : null}
           </Label>
 
           <svg
@@ -242,7 +259,11 @@ export default ({ state }: { state: Socket }) => {
           </svg>
           <Label style={{ marginLeft: -8, backgroundColor: categoryColor }}>
             {state.title}
-            <LabelTypeAnnotation>{state.recordType?.name}</LabelTypeAnnotation>
+            {state.showAnnotation ? (
+              <LabelTypeAnnotation>
+                {state.recordType?.name}
+              </LabelTypeAnnotation>
+            ) : null}
           </Label>
         </Container>
       )}

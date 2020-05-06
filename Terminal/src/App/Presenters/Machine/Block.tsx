@@ -10,7 +10,7 @@ import Wire from "../Wire/Wire";
 import WireDock from "../Socket/Socket";
 import Point from "../../../shared/Point";
 import { useObserver } from "mobx-react-lite";
-import SocketType from "../../Models/SocketType";
+import SocketType from "../../Models/document/SocketType";
 import Machine from "./Machine";
 import { useStores } from "../../../Hooks/useStores";
 import ChevronDoubleRightIcon from "mdi-react/ChevronDoubleRightIcon";
@@ -24,7 +24,7 @@ export default function BlockPresenter({
   children,
 }: {
   children: ReactNode;
-  state: Machine;
+  state: Machine<any>;
 }) {
   const [dragOffset, setDragOffset] = useState<Point | undefined>(undefined);
   const [isDrag, setIsDrag] = useState(false);
@@ -74,16 +74,20 @@ export default function BlockPresenter({
     >
       <TopBar style={barStyle}>{state.proto?.title}</TopBar>
       <DocksContainer>{children}</DocksContainer>
-      <BottomBar  style={barStyle}>
+      <BottomBar style={barStyle}>
+        <ToolStripContainer>{state.proto.toolstrip(state)}</ToolStripContainer>
         {/* state.proto.isInvocable */ true ? (
-          <div onMouseDown={(ev) => ev.stopPropagation()}>
+          <div
+            style={{ display: "flex", alignItems: "center" }}
+            onMouseDown={(ev) => ev.stopPropagation()}
+          >
             <TrashIcon
               onClick={(ev) => {
                 appStore.removeInstance(state);
               }}
               size={16}
             />
-            {state.cacheOut ? (
+            {/*   {state.cacheOut ? (
               <ContentSaveMoveIcon
                 onClick={() => (state.cacheOut = false)}
                 style={{ color: "white" }}
@@ -94,15 +98,19 @@ export default function BlockPresenter({
                 onClick={() => (state.cacheOut = true)}
                 size={16}
               />
-            )}
+            )} */}
+            {state.sockets.find((p) => p.type == SocketType.Input) ==
+            undefined ? (
+              <PlayIcon
+                onClick={async (ev) => {
+                  ev.stopPropagation();
+                  state.cache = null;
+                  state.produce();
+                }}
+                size={16}
+              />
+            ) : null}
 
-            <PlayIcon
-              onClick={(ev) => {
-                ev.stopPropagation();
-                state.playCurrent();
-              }}
-              size={16}
-            />
             <ChevronDoubleRightIcon size={16} />
           </div>
         ) : null}
@@ -110,6 +118,17 @@ export default function BlockPresenter({
     </BlockContainer>
   ));
 }
+
+const ToolStripContainer = styled.div`
+  height: 100%;
+  display: flex;
+  align-items: center;
+  margin-right: auto;
+  > * {
+    margin: 8px 4px;
+    color: gray;
+  }
+`;
 
 const BlockContainer = styled.div`
   userselect: "none";
@@ -146,6 +165,7 @@ const BottomBar = styled(Bar)`
   border-top: 1px ${(p) => p.theme.strain.border} solid;
   display: flex;
   justify-content: flex-end;
+  align-items: center;
   padding: 4px;
   color: gray;
 

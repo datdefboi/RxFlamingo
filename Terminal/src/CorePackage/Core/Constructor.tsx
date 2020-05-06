@@ -1,24 +1,31 @@
 import React from "react";
-import SocketType from "../../App/Models/SocketType";
-import MachinePrototype from "../../App/Models/MachinePrototype";
+import SocketType from "../../App/Models/document/SocketType";
+import MachinePrototype from "../../App/Models/document/MachinePrototype";
 import UUID from "../../shared/UUID";
 import Machine from "../../App/Presenters/Machine/Machine";
 import styled from "styled-components";
 import RecordTypePicker from "../../App/Components/Menus/RecordTypePicker";
-import RecordType, { RecordField } from "../../App/Models/RecordType";
-import RecordData from "../../App/Models/Record";
+import RecordType, { RecordField } from "../../App/Models/document/RecordType";
+import RecordData from "../../App/Models/execution/RecordData";
 import Wire from "../../App/Presenters/Wire/Wire";
 import Socket from "../../App/Presenters/Socket/Socket";
 import AppStore from "../../AppRoot/stores/AppStore";
 import { useStores } from "../../Hooks/useStores";
+import predefinedUUID from "../../App/predefinedTypeIDs";
 
-export default class Constructor extends MachinePrototype {
+interface State {
+  typeID: UUID;
+}
+
+export default class Constructor extends MachinePrototype<any> {
   sockets = [
     {
       id: 0,
       title: "",
-      typeID: UUID.Empty,
+      typeID: predefinedUUID.any,
       type: SocketType.Output,
+      isVirtual: false,
+      showTypeAnnotation: false,
     },
   ];
 
@@ -27,43 +34,41 @@ export default class Constructor extends MachinePrototype {
   title = "Сконструировать";
   isInvocable = false;
 
-  initShape = { type: null };
+  initShape = { type: UUID.Empty };
 
-  async invoke(
-    self: Machine,
-    params: RecordData[]
-  ): Promise<RecordData[] | null> {
+  async invoke(self: Machine<any>, params: RecordData[][]) {
+    const numT = self.state.type.id!;
     return [
-      {
-        type: self.state.type,
-        fields: params,
-        value: null,
-      },
+      params.map((p) => {
+        const out = new RecordData(numT, null);
+        out.fields = p;
+        return out;
+      }),
     ]; // TODO
   }
 
-  onWireConnected(appStore: AppStore, self: Machine, wire: Wire) {}
+  onWireConnected(self: Machine<any>, wire: Wire) {}
 
-  content = (self: Machine, appStore: AppStore) => {
-    const changeType = (t: RecordType) => {
+  content = (self: Machine<any>, appStore: AppStore) => {
+    const changeType = (t: UUID) => {
       self.state.type = t;
 
-      self.detachWires(appStore);
+      self.detachWires();
 
       self.state.type = t;
-      self.sockets[0].recordType = t;
+      self.sockets[0].recordID = t;
       self.dynamicSockets = [];
-      let i = 1;
-      for (var fld of t!.fields) {
+      let i = 0;
+      for (var fld of self.sockets[0].recordType!.fields) {
         self.dynamicSockets.push(
           new Socket(
             {
               type: SocketType.Input,
               title: fld.name,
-              typeID: self.state.type!.id,
+              typeID: fld.typeID,
               id: i++,
+              showTypeAnnotation: true,
             },
-            appStore,
             self
           )
         );
@@ -74,8 +79,8 @@ export default class Constructor extends MachinePrototype {
       <>
         <TypeWrapper>
           <RecordTypePicker
-            recordType={self.state.type}
-            recordTypeChanged={(type) => changeType(type)}
+            recordID={self.state.type}
+            recordIDChanged={(id) => changeType(id)}
           />
         </TypeWrapper>
       </>

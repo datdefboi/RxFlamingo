@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useStores } from "../../../Hooks/useStores";
-import MachineCategory from "../../Models/MachineCategory";
 import ContextMenuContentProps from "../ContextMenu/ContextMenuContentProps";
-import Package from "../../Models/Package";
+import Package from "../../Models/document/Package";
 import NumericIcon from "mdi-react/NumericIcon";
 import ArrowDecisionOutlineIcon from "mdi-react/ArrowDecisionOutlineIcon";
 import PackageVariantClosedIcon from "mdi-react/PackageVariantClosedIcon";
 import ViewDashboardOutlineIcon from "mdi-react/ViewDashboardOutlineIcon";
+import ImportIcon from "mdi-react/ImportIcon";
+import ExportIcon from "mdi-react/ExportIcon";
 
 export default function SmartMenu({
   menuPos,
@@ -22,10 +23,12 @@ export default function SmartMenu({
         return <NumericIcon size={24} />;
       case "Управление":
         return <ArrowDecisionOutlineIcon size={24} />;
-      case "Виджеты":
+      case "Ввод":
+        return <ImportIcon size={24} />;
+      case "Вывод":
         return <ViewDashboardOutlineIcon size={24} />;
       default:
-    return <div>{name}</div>;
+        return <div>{name}</div>;
     }
   }
 

@@ -10,8 +10,9 @@ import ThemeStore from "./stores/ThemeStore";
 import FactoryPresenter from "../App/Presenters/Factory/FactoryPresenter";
 import RecordsExplorer from "../App/Components/BottomMenu/RecordsExplorer";
 import FactoriesExplorer from "../App/Components/BottomMenu/FactoriesExplorer";
+import MainMenu from "../App/Components/Menus/MainMenu";
 
-const stores = {
+export const stores = {
   themeStore: new ThemeStore(),
   appStore: new AppStore(),
 };
@@ -31,6 +32,9 @@ export default function App() {
       <AppContainer>
         <FactoryPresenter state={appStore.currentFactory} />
         <BottomPanel>
+        {/*   <MenuContainer>
+            <MainMenu />
+          </MenuContainer> */}
           <PanelContainer>
             <RecordsExplorer />
           </PanelContainer>
@@ -42,10 +46,15 @@ export default function App() {
     </ThemeProvider>
   ));
 }
+
 const PanelContainer = styled.div`
   min-height: 300px;
   flex-grow: 1;
   border: 1px solid #525252;
+`;
+const MenuContainer = styled.div`
+  width: 40px;
+  height: 100%;
 `;
 
 const BottomPanel = styled.div`

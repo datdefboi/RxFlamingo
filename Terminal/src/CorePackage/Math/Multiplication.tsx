@@ -1,43 +1,45 @@
 import React from "react";
 import AddIcon from "mdi-react/AddIcon";
-import SocketType from "../../App/Models/SocketType";
-import MachinePrototype from "../../App/Models/MachinePrototype";
+import SocketType from "../../App/Models/document/SocketType";
+import MachinePrototype from "../../App/Models/document/MachinePrototype";
 import UUID from "../../shared/UUID";
 import Machine from "../../App/Presenters/Machine/Machine";
-import RecordData from "../../App/Models/Record";
+import RecordData from "../../App/Models/execution/RecordData";
+import RecordType from "../../App/Models/document/RecordType";
+import predefinedTypeIDs from "../../App/predefinedTypeIDs";
 
-export default class MultiplicationMachine extends MachinePrototype {
+export default class MultiplicationMachine extends MachinePrototype<any> {
   sockets = [
     {
       id: 0,
       title: "A",
-      typeID: UUID.FromString("7690b191-7157-427e-9841-8f3576306e5b"),
+      typeID: predefinedTypeIDs.number,
       type: SocketType.Input,
+      showTypeAnnotation: true,
     },
     {
       id: 1,
       title: "B",
-      typeID: UUID.FromString("7690b191-7157-427e-9841-8f3576306e5b"),
+      typeID: predefinedTypeIDs.number,
       type: SocketType.Input,
+      showTypeAnnotation: true,
     },
     {
-      id: 2,
+      id: 0,
       title: "A*B",
-      typeID: UUID.FromString("7690b191-7157-427e-9841-8f3576306e5b"),
+      typeID: predefinedTypeIDs.number,
       type: SocketType.Output,
+      showTypeAnnotation: true,
     },
   ];
 
   id = UUID.FromString("431007ea-7593-4745-b7a8-08f2b92f45cf");
   name = "Умножить";
   title = "";
+  isPerSetInvocable = true;
 
-  async invoke(self: Machine, props: RecordData[]) {
-    var numT = props[0].type;
-    return [{
-      fields: [],
-      type: numT,
-      value: props[0].value * props[1].value,
-    }];
+  async invokePerSet(self: Machine<any>, set: RecordData[]) {
+    var numT = set[0].recordType!;
+    return [new RecordData(numT, set[0].value * set[1].value)];
   }
 }

@@ -1,35 +1,40 @@
 import { useObserver } from "mobx-react-lite";
 import Area from "../../../shared/Area";
-import SocketType from "../../Models/SocketType";
+import SocketType from "../../Models/document/SocketType";
 import Vector from "../../../shared/Vector";
 import Point from "../../../shared/Point";
 import React from "react";
 import Wire from "./Wire";
-import Socket from "../Socket/Socket";
 
 export default ({ state }: { state: Wire }) =>
   useObserver(() => {
     const dockSize = new Area(22, 19);
-    const stroke = 8;
+    const stroke = 11;
 
     let fromPoint = state.fromSocket!.getPositionAction();
     let toPoint = state.toSocket!.getPositionAction();
 
-    const flipRatio = state.fromSocket!.type === SocketType.Input ? -1 : 1;
-    const isInput = state.fromSocket!.type === SocketType.Input;
-
+    /*   if (state.fromSocket!.type == SocketType.Input) {
+      const t = fromPoint;
+      fromPoint = toPoint;
+      toPoint = t;
+    }
+ */
     const crossArea = Area.betweenPoints(fromPoint, toPoint);
 
-    const startVector = new Vector(1, 0).mul(flipRatio);
-    const endVector = new Vector(-1, 0).mul(flipRatio);
+    const startVector = new Vector(1, 0);
+    const endVector = new Vector(-1, 0);
 
     const yxRatio = crossArea.height / crossArea.width;
-    const horizontalDif = (toPoint.x - fromPoint.x) * flipRatio;
+    const horizontalDif = toPoint.x - fromPoint.x;
     let curvatureRatio =
       horizontalDif > 0
-        ? (Math.tanh(-2 * yxRatio + 2) / 3 + 4 / 6) *
-          (-Math.sqrt(1 / 20 / yxRatio) + 1) *
-          crossArea.width
+        ? Math.max(
+            0,
+            (Math.tanh(-2 * yxRatio + 2) / 3 + 4 / 6) *
+              (-Math.sqrt(1 / 20 / yxRatio) + 1) *
+              crossArea.width
+          )
         : 0;
 
     if (Math.abs(curvatureRatio) == 1 / 0) curvatureRatio = 0;
@@ -78,7 +83,7 @@ export default ({ state }: { state: Wire }) =>
             1 +
             dockSize.width},${pos.y + offsetY - dockSize.height / 2})`}
           d="M22 14.5L16 19L3.49691e-07 15L-5.96007e-07 4L16 1.56163e-06L22 4.5L22 14.5Z"
-          fill={"teal"}
+          fill={state.fromSocket?.recordType?.color}
         />
       );
     }
@@ -88,10 +93,9 @@ export default ({ state }: { state: Wire }) =>
         <path
           transform={`translate(${pos.x - leftTopBound.x + 1},${pos.y +
             offsetY -
-            dockSize.height / 2 +
-            1})`}
+            dockSize.height / 2})`}
           d="M0 4.50001L5.99998 3.8147e-06L22 4L22 15L5.99998 19L0 14.5L0 4.50001Z"
-          fill={"teal"}
+          fill={state.fromSocket?.recordType?.color}
         />
       );
     }
@@ -113,13 +117,15 @@ export default ({ state }: { state: Wire }) =>
                     C ${startTarget.x + offsetX} ${startTarget.y + offsetY},
                      ${endTarget.x + offsetX} ${endTarget.y + offsetY},
                       ${toPoint.x + offsetX} ${toPoint.y + offsetY}`}
-          stroke="teal"
+          stroke={state.fromSocket?.recordType?.color}
+          stroke-dasharray="20,20"
           strokeWidth={stroke}
+          stroke-linecap="round"
           fill="transparent"
         />
 
         {RenderLeftDock(fromPoint)}
-        {state.toSocket!.isDocked ? RenderRightDock(toPoint) : null}
+        {RenderRightDock(toPoint)}
       </svg>
     );
   });

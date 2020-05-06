@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import PlusIcon from "mdi-react/PlusIcon";
 import { useStores } from "../../../Hooks/useStores";
-import RecordType, { RecordField } from "../../Models/RecordType";
+import RecordType, { RecordField } from "../../Models/document/RecordType";
 import { useObserver } from "mobx-react-lite";
 import CardPlusOutlineIcon from "mdi-react/CardPlusOutlineIcon";
 import CardOutlineIcon from "mdi-react/CardOutlineIcon";
@@ -20,7 +20,7 @@ export default function RecordsExplorer(props: any) {
       buildinRepresentation: "none",
       fields: [],
       id: UUID.Generate(),
-
+      color: "teal",
       defaultValue: null,
       isRenames: true,
       name: "new record",
@@ -31,7 +31,7 @@ export default function RecordsExplorer(props: any) {
   function CreateField(record: RecordType) {
     record.fields.push({
       name: "newField",
-      type: null,
+      typeID: UUID.Empty,
       id: UUID.Generate(),
       isRenames: true,
     });
@@ -80,10 +80,19 @@ export default function RecordsExplorer(props: any) {
             <RecordTitle onClick={() => (r.isRenames = true)}>
               {r.name}
             </RecordTitle>
-            <div style={{ paddingLeft: 8, color: "cornflowerblue", paddingRight: 8 }}> типа </div>
+            <div
+              style={{
+                paddingLeft: 8,
+                color: "cornflowerblue",
+                paddingRight: 8,
+              }}
+            >
+              {" "}
+              типа{" "}
+            </div>
             <RecordTypePicker
-              recordType={r.type}
-              recordTypeChanged={(type) => (r.type = type)}
+              recordID={r.typeID}
+              recordIDChanged={(type) => (r.typeID = type)}
             />
           </>
         ) : (
@@ -123,7 +132,7 @@ export default function RecordsExplorer(props: any) {
         ))}
         {appStore.loadedPackages.map((p) =>
           p.records.map((r) => (
-            <RecordGroup  key={r.name+p.name}>
+            <RecordGroup key={r.name + p.name}>
               {RenderRecord(r)}
               {r.fields.map((f) => RenderField(f))}
             </RecordGroup>

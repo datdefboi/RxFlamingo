@@ -1,84 +1,90 @@
 import React from "react";
-import SocketType from "../../App/Models/SocketType";
-import MachinePrototype from "../../App/Models/MachinePrototype";
+import SocketType from "../../App/Models/document/SocketType";
+import MachinePrototype from "../../App/Models/document/MachinePrototype";
 import UUID from "../../shared/UUID";
 import Machine from "../../App/Presenters/Machine/Machine";
 import styled from "styled-components";
 import RecordTypePicker from "../../App/Components/Menus/RecordTypePicker";
-import RecordType, { RecordField } from "../../App/Models/RecordType";
-import RecordData from "../../App/Models/Record";
+import RecordType, { RecordField } from "../../App/Models/document/RecordType";
+import RecordData from "../../App/Models/execution/RecordData";
 import Wire from "../../App/Presenters/Wire/Wire";
 import Socket from "../../App/Presenters/Socket/Socket";
 import AppStore from "../../AppRoot/stores/AppStore";
 import { useStores } from "../../Hooks/useStores";
+import predefinedTypeIDs from "../../App/predefinedTypeIDs";
 import MergeIcon from "mdi-react/MergeIcon";
 
-export default class Merge extends MachinePrototype {
+interface State {
+  typeID: UUID;
+}
+
+export default class Merge extends MachinePrototype<any> {
   sockets = [
     {
       id: 0,
       title: "",
-      typeID: UUID.Empty,
+      typeID: predefinedTypeIDs.any,
       type: SocketType.Input,
+      isVirtual: false,
+      showTypeAnnotation: false,
     },
     {
-      id: 1,
+      id: 0,
       title: "",
-      typeID: UUID.Empty,
+      typeID: predefinedTypeIDs.any,
       type: SocketType.Output,
+      isVirtual: false,
+      showTypeAnnotation: false,
     },
   ];
 
-  id = UUID.FromString("33104b16-da81-4f4a-80c1-9e7d00e05d4b");
+  id = UUID.FromString("f23aa30a-fb15-482d-bfc8-254168325b32");
   name = "Обьединить";
-  title = "Обьединить";
+  title = "";
   isInvocable = false;
 
-  initShape = { type: null };
+  initShape = { type: UUID.Empty };
 
-  async invoke(
-    self: Machine,
-    params: RecordData[]
-  ): Promise<RecordData[] | null> {
-    return [
-      {
-        type: self.state.type,
-        fields: params,
-        value: null,
-      },
-    ]; // TODO
+  async invoke(self: Machine<any>, params: RecordData[][]) {
+    return params.map((p) => {
+      const out = [];
+      for (let i = 0; i < self.dynamicSockets.length; i++) {
+        out.push(Object.assign({}, p[0]));
+      }
+      return out;
+    }); // TODO
   }
 
-  onWireConnected(appStore: AppStore, self: Machine, wire: Wire) {}
+  onWireConnected(self: Machine<any>, wire: Wire) {
+    if (wire.toSocket?.machine == self) {
+      const id = wire.fromSocket?.recordID!;
+      self.sockets[0].recordID = id;
+      self.sockets[1].recordID = id;
+      self.dynamicSockets.forEach((e) => {
+        e.recordID = id;
+      });
+    }
+    let connectedCount = self.sockets[0].isDocked ? 1 : 0;
+    for (const s of self.dynamicSockets) if (s.isDocked) connectedCount++;
+    if (connectedCount == self.dynamicSockets.length + 1)
+      self.dynamicSockets.push(
+        new Socket(
+          {
+            id: connectedCount,
+            showTypeAnnotation: false,
+            title: "",
+            typeID: self.sockets[0].recordID,
+            type: SocketType.Input,
+          },
+          self,
+          false
+        )
+      );
+  }
 
-  content = (self: Machine, appStore: AppStore) => {
-    /*  const changeType = (t: RecordType) => {
-      self.state.type = t;
-
-      self.detachWires(appStore);
-
-      self.state.type = t;
-      self.sockets[0].recordType = t;
-      self.dynamicSockets = [];
-      let i = 1;
-      for (var fld of t!.fields) {
-        self.dynamicSockets.push(
-          new Socket(
-            {
-              type: SocketType.Input,
-              title: fld.name,
-              typeID: self.state.type!.id,
-              id: i++,
-            },
-            appStore,
-            self
-          )
-        );
-      }
-    }; */
-
-    return <MergeIcon style={{color:"white"}} size={18}/>
-  };
+  content = (self: Machine<any>) => (
+    <MergeIcon style={{ color: "white" }} size={20} />
+  );
 }
 
 const TypeWrapper = styled.div`

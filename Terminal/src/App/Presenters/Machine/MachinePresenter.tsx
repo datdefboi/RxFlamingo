@@ -2,12 +2,12 @@ import { useObserver } from "mobx-react-lite";
 import React from "react";
 import styled from "styled-components";
 import Machine from "./Machine";
-import SocketType from "../../Models/SocketType";
+import SocketType from "../../Models/document/SocketType";
 import SocketPresenter from "../Socket/SocketPresenter";
 import Block from "./Block";
 import { useStores } from "../../../Hooks/useStores";
 
-export default ({ state }: { state: Machine }) => {
+export default ({ state }: { state: Machine<any> }) => {
   const { appStore } = useStores();
 
   function Spacer({ style }: { style: any }) {
@@ -31,7 +31,7 @@ export default ({ state }: { state: Machine }) => {
       <DocksLine>
         <Spacer style={{}} />
         {inputSockets.map((i) => (
-          <SocketPresenter key={i.id} state={i} />
+          <SocketPresenter key={i.id * i.type ? 1 : -1} state={i} />
         ))}
         <Spacer style={{}} />
       </DocksLine>
@@ -55,7 +55,7 @@ export default ({ state }: { state: Machine }) => {
       <DocksLine>
         <Spacer style={{}} />
         {outputSockets.map((i) => (
-          <SocketPresenter key={i.id} state={i} />
+          <SocketPresenter key={i.id * i.type ? 1 : -1} state={i} />
         ))}
         <Spacer style={{}} />
       </DocksLine>

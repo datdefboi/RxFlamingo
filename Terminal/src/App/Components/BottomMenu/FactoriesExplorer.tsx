@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import PlusIcon from "mdi-react/PlusIcon";
 import { useStores } from "../../../Hooks/useStores";
-import RecordType, { RecordField } from "../../Models/RecordType";
+import RecordType, { RecordField } from "../../Models/document/RecordType";
 import { useObserver } from "mobx-react-lite";
 import CardPlusOutlineIcon from "mdi-react/CardPlusOutlineIcon";
 import CardOutlineIcon from "mdi-react/CardOutlineIcon";
@@ -19,6 +19,7 @@ export default function FactoriesExplorer(props: any) {
     pkg.records.push({
       buildinRepresentation: "none",
       fields: [],
+      color: "teal",
       defaultValue: null,
       id: UUID.Generate(),
       isRenames: true,
@@ -30,7 +31,7 @@ export default function FactoriesExplorer(props: any) {
   function CreateField(record: RecordType) {
     record.fields.push({
       name: "newField",
-      type: null,
+      typeID: UUID.Empty,
       id: UUID.Generate(),
       isRenames: true,
     });
@@ -78,8 +79,8 @@ export default function FactoriesExplorer(props: any) {
               {r.name}
             </RecordTitle>
             <RecordTypePicker
-              recordType={r.type}
-              recordTypeChanged={(type) => (r.type = type)}
+              recordID={r.typeID}
+              recordIDChanged={(type) => (r.typeID = type)}
             />
           </>
         ) : (

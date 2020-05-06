@@ -1,23 +1,40 @@
 import React from "react";
-import SocketType from "../../App/Models/SocketType";
-import MachinePrototype from "../../App/Models/MachinePrototype";
+import SocketType from "../../App/Models/document/SocketType";
+import MachinePrototype from "../../App/Models/document/MachinePrototype";
 import UUID from "../../shared/UUID";
 import Machine from "../../App/Presenters/Machine/Machine";
 import styled from "styled-components";
 import RecordTypePicker from "../../App/Components/Menus/RecordTypePicker";
-import RecordType from "../../App/Models/RecordType";
-import RecordData from "../../App/Models/Record";
+import RecordType from "../../App/Models/document/RecordType";
+import RecordData from "../../App/Models/execution/RecordData";
 import Wire from "../../App/Presenters/Wire/Wire";
 import AppStore from "../../AppRoot/stores/AppStore";
 import Socket from "../../App/Presenters/Socket/Socket";
+import { stores } from "../../AppRoot/App";
+import { useObserver } from "mobx-react-lite";
+import predefinedTypeIDs from "../../App/predefinedTypeIDs";
 
-export default class Destructor extends MachinePrototype {
+interface State {
+  typeID: UUID;
+}
+
+export default class Destructor extends MachinePrototype<State> {
   sockets = [
     {
       id: 0,
       title: "",
-      typeID: UUID.Empty,
+      typeID: predefinedTypeIDs.any,
       type: SocketType.Input,
+      isVirtual: false,
+      showTypeAnnotation: true,
+    },
+    {
+      id: 0,
+      title: "исходный",
+      typeID: predefinedTypeIDs.any,
+      type: SocketType.Output,
+      isVirtual: false,
+      showTypeAnnotation: true,
     },
   ];
 
@@ -26,60 +43,53 @@ export default class Destructor extends MachinePrototype {
   title = "Разобрать";
   isInvocable = false;
 
-  initShape = { type: null, value: null };
+  initShape = { typeID: UUID.Empty };
 
-  async invoke(
-    self: Machine,
-    params: RecordData[]
-  ): Promise<RecordData[] | null> {
-    return params[0].fields; // TODO
+  async invoke(self: Machine<any>, params: RecordData[][]) {
+    return params.map((p) => [p[0], ...p[0].fields]); // TODO
   }
 
-  onWireConnected(appStore: AppStore, self: Machine, wire: Wire) {
+  onWireConnected(self: Machine<any>, wire: Wire) {
     const t = wire.fromSocket?.recordType;
-    
-    self.detachWires(
-      appStore,
-      (w) =>
-        (w.fromSocket?.machine === self &&
-          w.fromSocket.type === SocketType.Output) ||
-        (w.toSocket?.machine === self && w.toSocket.type === SocketType.Output)
-    );
+    if (wire.toSocket === self.sockets[0])
+      this.ChangeType(self, t!.id, (w) => w !== wire);
+  }
 
-    self.state.type = t;
+  ChangeType(self: Machine<State>, id: UUID, pred: (w: Wire) => boolean) {
+    self.detachWires(pred);
+
+    self.state.typeID = id;
+    self.sockets[0].recordID = id;
+    self.sockets[1].recordID = id;
     self.dynamicSockets = [];
-    let i = 1;
-    for (var fld of t!.fields) {
+    let i = 0;
+    for (var fld of stores.appStore.findRecordTypeByID(id)!.fields) {
       self.dynamicSockets.push(
         new Socket(
           {
             type: SocketType.Output,
             title: fld.name,
-            typeID: fld!.type!.id,
+            typeID: fld!.typeID,
             id: i++,
+            showTypeAnnotation: true,
           },
-          appStore,
           self
         )
       );
     }
   }
 
-  content = (self: Machine) => {
-    function ChangeType(type: RecordType) {
-      self.state.type = type;
-    }
-
-    return (
+  content = (self: Machine<State>) => {
+    return useObserver(() => (
       <>
         <TypeWrapper>
           <RecordTypePicker
-            recordType={self.state.type}
-            recordTypeChanged={(type) => ChangeType(type)}
+            recordID={self.state.typeID}
+            recordIDChanged={(id) => this.ChangeType(self, id, (w) => true)}
           />
         </TypeWrapper>
       </>
-    );
+    ));
   };
 }
 
