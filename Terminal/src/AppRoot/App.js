@@ -38,9 +38,9 @@ export default function App() {
           <PanelContainer>
             <RecordsExplorer />
           </PanelContainer>
-          <PanelContainer>
+         {/*  <PanelContainer>
             <FactoriesExplorer />
-          </PanelContainer>
+          </PanelContainer> */}
         </BottomPanel>
       </AppContainer>
     </ThemeProvider>

@@ -8,7 +8,6 @@ export default class Wire {
   id: UUID = UUID.Empty;
 
   data: RecordData[] | null = null;
-  rays: Set<UUID> = new Set();
 
   constructor(from: Socket | null, to: Socket | null) {
     this.fromSocket = from;

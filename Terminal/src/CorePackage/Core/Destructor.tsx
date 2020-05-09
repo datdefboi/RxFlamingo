@@ -42,11 +42,12 @@ export default class Destructor extends MachinePrototype<State> {
   name = "Деструктор";
   title = "Разобрать";
   isInvocable = false;
+  isPerSetInvocable = true;
 
   initShape = { typeID: UUID.Empty };
 
-  async invoke(self: Machine<any>, params: RecordData[][]) {
-    return params.map((p) => [p[0], ...p[0].fields]); // TODO
+  async invokePerSet(self: Machine<any>, params: RecordData[]) {
+    return [params[0], ...params[0].fields];
   }
 
   onWireConnected(self: Machine<any>, wire: Wire) {
@@ -62,7 +63,7 @@ export default class Destructor extends MachinePrototype<State> {
     self.sockets[0].recordID = id;
     self.sockets[1].recordID = id;
     self.dynamicSockets = [];
-    let i = 0;
+    let i = 1;
     for (var fld of stores.appStore.findRecordTypeByID(id)!.fields) {
       self.dynamicSockets.push(
         new Socket(

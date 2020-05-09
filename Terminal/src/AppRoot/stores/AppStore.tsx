@@ -23,12 +23,24 @@ import predefinedUUID from "../../App/predefinedTypeIDs";
 import Split from "../../CorePackage/Core/Split";
 import Range from "../../CorePackage/Widgets/Range";
 import Route from "../../CorePackage/Core/Route";
-import Greater from "../../CorePackage/Math/logical/Greater";
+import Greater from "../../CorePackage/Logical/Greater";
 import LogicalLog from "../../CorePackage/Widgets/LogicalLog";
 import LogicalConstant from "../../CorePackage/Widgets/LogicalConstant";
 import CsvFromFile from "../../CorePackage/Widgets/CsvFromFile";
 import SquareMachine from "../../CorePackage/Math/Square";
 import TakeFirst from "../../CorePackage/Core/Sequence/TakeFirst";
+import PowerMachine from "../../CorePackage/Math/Power";
+import Destributor from "../../CorePackage/Core/Sequence/Destributor";
+import SummatorMachine from "../../CorePackage/Core/Aggregs/Sum";
+import AveragerMachine from "../../CorePackage/Core/Aggregs/Avg";
+import Lower from "../../CorePackage/Logical/Lower";
+import And from "../../CorePackage/Logical/And";
+import Or from "../../CorePackage/Logical/Or";
+import Not from "../../CorePackage/Logical/Not";
+import TakeLast from "../../CorePackage/Core/Sequence/TakeLast";
+import SkipFirst from "../../CorePackage/Core/Sequence/SkipFirst";
+import SubMachine from "../../CorePackage/Math/Sub";
+import DivideMachine from "../../CorePackage/Math/Divide";
 
 export default class AppStore {
   @observable currentFactory: Factory = new Factory();
@@ -101,10 +113,14 @@ export default class AppStore {
       factories: [],
       machinePrototypes: [
         new AdditionMachine(),
+        new SubMachine(),
         new MultiplicationMachine(),
+        new DivideMachine(),
         new SquareMachine(),
+        new PowerMachine(),
         new RootMachine(),
-        new Greater(),
+        new SummatorMachine(),
+        new AveragerMachine(),
       ],
       name: "Математика",
       records: [
@@ -172,9 +188,26 @@ export default class AppStore {
         new Destructor(),
         new Route(),
         new Split(),
+        new Destributor(),
         new TakeFirst(),
+        new TakeLast(),
+        new SkipFirst(),
       ],
       name: "Управление",
+      records: [],
+    } as Package;
+
+    const logical = {
+      color: "#42390c",
+      factories: [],
+      machinePrototypes: [
+        new And(),
+        new Or(),
+        new Not(),
+        new Greater(),
+        new Lower(),
+      ],
+      name: "Логика",
       records: [],
     } as Package;
 
@@ -200,7 +233,7 @@ export default class AppStore {
       records: [],
     } as Package;
 
-    this.loadedPackages.push(math, flow, input, output);
+    this.loadedPackages.push(math, flow, logical, input, output);
   }
 
   @action initValues() {

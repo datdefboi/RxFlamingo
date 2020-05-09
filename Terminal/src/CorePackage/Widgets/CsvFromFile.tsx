@@ -8,17 +8,34 @@ import styled from "styled-components";
 import RecordData from "../../App/Models/execution/RecordData";
 import { values } from "mobx";
 import predefinedTypeIDs from "../../App/predefinedTypeIDs";
+import { stores } from "../../AppRoot/App";
 
 interface State {
-  data: number[][];
+  data: number[];
+  rows: number;
+  columns: number;
 }
 
 export default class CsvFromFile extends MachinePrototype<State> {
   sockets = [
     {
       id: 0,
-      title: "",
-      typeID: predefinedTypeIDs.bool,
+      title: "данные",
+      typeID: predefinedTypeIDs.number,
+      type: SocketType.Output,
+      showTypeAnnotation: true,
+    },
+    {
+      id: 1,
+      title: "линий",
+      typeID: predefinedTypeIDs.number,
+      type: SocketType.Output,
+      showTypeAnnotation: true,
+    },
+    {
+      id: 2,
+      title: "строк",
+      typeID: predefinedTypeIDs.number,
       type: SocketType.Output,
       showTypeAnnotation: true,
     },
@@ -28,25 +45,34 @@ export default class CsvFromFile extends MachinePrototype<State> {
   name = "Прочитать csv";
   title = "Данные из csv";
 
-  initShape = { data: [] };
+  initShape = { data: [], rows: 0, columns: 0 };
 
-  async invoke(
-    self: Machine<any>,
-    params: RecordData[][]
-  ){
-    return [[]];
+  async invoke(self: Machine<State>, params: RecordData[][]) {
+    const t = stores.appStore.findRecordTypeByID(predefinedTypeIDs.number)!;
+    return [
+      self.state.data.map((p) => new RecordData(t, +p)),
+      [new RecordData(t, self.state.rows)],
+      [new RecordData(t, self.state.columns)],
+    ];
   }
 
   content = (self: Machine<State>) => {
     function SetData(source: string) {
-      self.state.data = source
-        .split("\n")
-        .map((l) => l.split(",").map((p) => +p));
+      let columns = 0;
+      const map = source.split("\n").map((l) => {
+        const row = l.split(",").map((p) => +p);
+        columns = row.length;
+        return row;
+      });
+
+      self.state.rows = map.length;
+      self.state.columns = columns;
+      self.state.data = map.flat();
     }
 
     return (
       <LogRecord>
-        <input
+        <Container
           type="file"
           onChange={async (ev) => {
             SetData(await ev.target.files!.item(0)!.text());
@@ -56,6 +82,12 @@ export default class CsvFromFile extends MachinePrototype<State> {
     );
   };
 }
+
+const Container = styled.input`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
 
 const LogRecord = styled.div`
   color: white;

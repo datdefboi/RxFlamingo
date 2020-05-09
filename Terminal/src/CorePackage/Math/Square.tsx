@@ -26,14 +26,13 @@ export default class SquareMachine extends MachinePrototype<any> {
     },
   ];
 
-  id = UUID.FromString("421007ea-7593-4745-b7a8-08f2b92f45cf");
+  id = UUID.FromString("421107ea-7593-4745-b7a8-08f2b92f45cf");
   name = "Квадрат";
   title = "";
+  isPerSetInvocable = true;
 
-  async invoke(self: Machine<any>, params: RecordData[][]) {
-    var numT = params[0][0].recordType!;
-    return params.map((p) => {
-      return [new RecordData(numT, p[0].value * p[0].value)];
-    });
+  async invokePerSet(self: Machine<any>, params: RecordData[]) {
+    var numT = params[0].recordType!;
+    return [new RecordData(numT, params[0].value * params[0].value)];
   }
 }

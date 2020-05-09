@@ -30,15 +30,9 @@ export default class LogicalLog extends MachinePrototype<State> {
 
   initShape = { val: false };
 
-  async invoke(self: Machine<any>, params: RecordData[][]) {
-    const numT = self.sockets[0].recordType!;
-    return params.map((p) => {
-      if (p[0]) {
-        var val = p[0].value;
-        self.state.val = val;
-      }
-      return [new RecordData(numT, self.state.val)];
-    });
+  async invoke(self: Machine<State>, params: RecordData[][]) {
+    self.state.val = params[0][0].value
+    return [[]];
   }
 
   content = (self: Machine<State>) => (

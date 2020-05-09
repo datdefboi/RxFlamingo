@@ -12,6 +12,7 @@ import Socket from "../../App/Presenters/Socket/Socket";
 import AppStore from "../../AppRoot/stores/AppStore";
 import { useStores } from "../../Hooks/useStores";
 import predefinedUUID from "../../App/predefinedTypeIDs";
+import { stores } from "../../AppRoot/App";
 
 interface State {
   typeID: UUID;
@@ -32,19 +33,15 @@ export default class Constructor extends MachinePrototype<any> {
   id = UUID.FromString("f63ca30a-fb15-482d-bfc8-254168325b32");
   name = "Конструктор";
   title = "Сконструировать";
-  isInvocable = false;
+  isPerSetInvocable = true;
 
   initShape = { type: UUID.Empty };
 
-  async invoke(self: Machine<any>, params: RecordData[][]) {
-    const numT = self.state.type.id!;
-    return [
-      params.map((p) => {
-        const out = new RecordData(numT, null);
-        out.fields = p;
-        return out;
-      }),
-    ]; // TODO
+  async invokePerSet(self: Machine<any>, params: RecordData[]) {
+    const t = stores.appStore.findRecordTypeByID(self.state.type)!;
+    const out = new RecordData(t, null);
+    out.fields = params;
+    return [out];
   }
 
   onWireConnected(self: Machine<any>, wire: Wire) {}

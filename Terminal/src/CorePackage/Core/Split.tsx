@@ -38,16 +38,17 @@ export default class Split extends MachinePrototype<any> {
     },
   ];
 
-  id = UUID.FromString("f23aa30a-fb15-482d-bfc8-254168325b32");
+  id = UUID.FromString("f232a30a-fb15-482d-bfc8-254168325b32");
   name = "Копировать";
   title = "";
   isInvocable = false;
+  isPerSetInvocable = true;
 
   initShape = { type: UUID.Empty };
 
-  async invoke(self: Machine<any>, params: RecordData[][]) {
+  async invokePerSet(self: Machine<any>, params: RecordData[]) {
     const out = [];
-    for (let i = 0; i < self.dynamicSockets.length; i++) {
+    for (let i = 0; i < self.dynamicSockets.length + 1; i++) {
       out.push(params[0]);
     }
     return out;

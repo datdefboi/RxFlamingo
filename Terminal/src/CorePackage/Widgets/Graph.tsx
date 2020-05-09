@@ -13,6 +13,10 @@ import { useObserver } from "mobx-react-lite";
 
 interface State {
   values: Point[];
+  maxX: number;
+  maxY: number;
+  minX: number;
+  minY: number;
 }
 
 export default class Graph extends MachinePrototype<State> {
@@ -39,6 +43,10 @@ export default class Graph extends MachinePrototype<State> {
 
   initShape = {
     values: [],
+    minX: 0,
+    minY: 0,
+    maxY: 0,
+    maxX: 0,
   };
 
   async invoke(self: Machine<State>, params: RecordData[][]) {
@@ -62,20 +70,28 @@ export default class Graph extends MachinePrototype<State> {
       const values = self.state.values;
       if (values.length > 0) {
         const minX = values[0].x;
+        self.state.minX = minX;
+
         const maxX = values[values.length - 1].x;
+        self.state.maxX = maxX;
+
         const rangeX = Math.abs(maxX - minX);
 
         ctx.strokeStyle = "white";
         ctx.beginPath();
 
         let minY = Number.MAX_VALUE;
+        self.state.minY = minY;
         values.forEach((e) => {
           if (e.y < minY) minY = e.y;
         });
+
         let maxY = Number.MIN_VALUE;
+        self.state.maxY = maxY;
         values.forEach((e) => {
           if (e.y > maxY) maxY = e.y;
         });
+
         const rangeY = Math.abs(maxY - minY);
         console.log(values);
 
@@ -92,13 +108,44 @@ export default class Graph extends MachinePrototype<State> {
       }
     }, [self.state.values.length]);
     return useObserver(() => (
-      <div style={{ display: "flex", flexDirection: "column" }}>
+      <GraphContainer>
+       {/*  <div style={{ gridRow: 1, gridColumn: 1, justifySelf: "end" }}>
+          {self.state.maxY.toFixed(1)}
+        </div>
+        <div
+          style={{
+            alignSelf: "end",
+            gridRow: 1,
+            gridColumn: 1,
+            justifySelf: "end",
+          }}
+        >
+          {self.state.minY.toFixed(1)}
+        </div>
+        <div style={{ gridRow: 2, gridColumn: 2 }}>
+          {self.state.minX.toFixed(1)}
+        </div>
+        <div style={{ justifySelf: "end", gridRow: 2, gridColumn: 2 }}>
+          {self.state.maxY.toFixed(1)}
+        </div> */}
         <GraphCanvas ref={ref} width={width} height={height} />
-      </div>
+      </GraphContainer>
     ));
   };
 }
+const GraphContainer = styled.div`
+  display: grid;
+  grid-template-rows: auto 30px;
+  grid-template-columns: 30px auto;
+  color: gray;
+  > * {
+    margin: 2px;
+  }
+`;
 
 const GraphCanvas = styled.canvas`
+  grid-column-start: 2;
+  grid-row-start: 1;
   border-left: 1px solid ${(p) => p.theme.strain.border};
+  border-bottom: 1px solid ${(p) => p.theme.strain.border};
 `;

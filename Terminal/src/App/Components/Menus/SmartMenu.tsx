@@ -9,6 +9,7 @@ import PackageVariantClosedIcon from "mdi-react/PackageVariantClosedIcon";
 import ViewDashboardOutlineIcon from "mdi-react/ViewDashboardOutlineIcon";
 import ImportIcon from "mdi-react/ImportIcon";
 import ExportIcon from "mdi-react/ExportIcon";
+import CircleHalfFull from 'mdi-react/CircleHalfFullIcon'
 
 export default function SmartMenu({
   menuPos,
@@ -27,6 +28,8 @@ export default function SmartMenu({
         return <ImportIcon size={24} />;
       case "Вывод":
         return <ViewDashboardOutlineIcon size={24} />;
+      case "Логика":
+        return <CircleHalfFull size={24} />;
       default:
         return <div>{name}</div>;
     }
@@ -110,7 +113,7 @@ const CategoryWrapper = styled.div`
 `;
 
 const Card = styled.div`
-  min-width: 200px;
+  min-width: 220px;
   min-height: 200px;
   background-color: #14151b;
   border-radius: 4px;

@@ -42,7 +42,7 @@ export default class LogicalConstant extends MachinePrototype<State> {
         checked={self.state.val}
         onClick={(ev) => {
           self.state.val = (ev as any).target.checked;
-          self.produce();
+          self.execute();
         }}
       />
     </LogRecord>

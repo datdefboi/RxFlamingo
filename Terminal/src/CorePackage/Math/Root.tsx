@@ -35,6 +35,7 @@ export default class RootMachine extends MachinePrototype<any> {
   id = UUID.FromString("91d2ee8e-31e9-423d-b7b0-2dc5005a4712");
   name = "Получить корень в степени";
   title = "";
+  isPerSetInvocable = true;
 
   async invoke(self: Machine<any>, params: RecordData[][]) {
     var numT = params[0][0].recordType!;

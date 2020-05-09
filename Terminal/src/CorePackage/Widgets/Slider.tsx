@@ -39,7 +39,7 @@ export default class Slider extends MachinePrototype<State> {
     async function changeVal(val: number) {
       self.state.value = val;
       self.cache = null;
-      self.produce();
+      self.execute();
     }
 
     return (

@@ -32,14 +32,13 @@ export default class AdditionMachine extends MachinePrototype<any> {
     },
   ];
 
-  id = UUID.FromString("as5eb614-a1ee-4382-9b09-c4a5e9c296a7");
+  id = UUID.FromString("as5es614-a1ee-4382-9b09-c4a5e9c296a7");
   name = "Сложить";
   title = "Сложить";
+  isPerSetInvocable = true;
 
-  async invoke(self: Machine<any>, params: RecordData[][]) {
-    var numT = params[0][0].recordType!;
-    return params.map((p) => {
-      return [new RecordData(numT, p[0].value + p[1].value)];
-    });
+  async invokePerSet(self: Machine<any>, set: RecordData[]) {
+    var numT = set[0].recordType!;
+    return [new RecordData(numT, set[0].value + set[1].value)];
   }
 }

@@ -21,7 +21,7 @@ export default class Machine<StateT> {
   @observable state: StateT;
 
   cache: RecordData[][] | null = null;
-  isConsumationPending = false;
+  waitsForData = false;
 
   color: string = "black";
 
@@ -29,53 +29,77 @@ export default class Machine<StateT> {
     for (var w of this.wires.filter(predicate)) stores.appStore.removeWire(w);
   }
 
-  async consume(selfReq: boolean) {
+  async execute() {
     console.log("consume start", this.proto.title);
+
     const unresolvedDepsQ = [];
     const depsWires = this.wires.filter((p) => p.toSocket?.machine === this);
-
-    /* const pendingRays = new Set<UUID>();
-    for (var dep of depsWires)
-      if (dep.data) dep.rays.forEach((r) => pendingRays.add(r)); */
 
     const inputs = [] as RecordData[][];
 
     for (var dep of depsWires) {
       const data = dep.data;
-      if (!data) unresolvedDepsQ.push(dep.fromSocket?.machine);
-      else {
-        inputs.push(data);
-        dep.data = null;
+      if (!data) {
+        unresolvedDepsQ.push(dep.fromSocket?.machine);
       }
     }
 
     this.cache = null;
 
-    if (!selfReq) this.isConsumationPending = false;
+    //if (!selfReq) this.isConsumationPending = false;
 
     if (unresolvedDepsQ.length) {
-      unresolvedDepsQ.map((d) => d?.produce());
-      return;
+      this.waitsForData = true;
+
+      if (unresolvedDepsQ.some((p) => p?.waitsForData)) {
+        this.waitsForData = false;
+        return;
+      }
+
+      for (const dep of unresolvedDepsQ)
+        if (!this.cache) {
+          await dep?.execute();
+        }
+      this.waitsForData = false;
+    }
+
+    for (var dep of depsWires) {
+      inputs.push(dep.data!);
+      dep.data = null;
     }
 
     let res: RecordData[][];
     if (this.proto.isPerSetInvocable) {
       res = [];
-      const indexes = [inputs.map((p) => 0)];
-      let is
+
+      const indexes = inputs.map((p) => 0);
+
+      const paramsCount = inputs.length;
+      const lengths = inputs.map((v) => v.length);
+      const maxQ = Math.max(...lengths);
+
+      if (!lengths.includes(0)) {
+        for (let i = 0; i < maxQ; i++) {
+          let set = [];
+          for (let i = 0; i < paramsCount; i++) {
+            let paramVal = inputs[i][indexes[i]];
+            if (paramVal == undefined) {
+              paramVal = inputs[i][0];
+              indexes[i] = 1;
+            }
+            indexes[i]++;
+            set.push(paramVal);
+          }
+          const out = await this.proto.invokePerSet(this, set);
+          if (!res.length) res = out.map((p) => []);
+          for (let i = 0; i < out.length; i++) if (out[i]) res[i].push(out[i]!);
+        }
+      }
     } else {
       res = await this.proto.invoke(this, inputs);
     }
-    this.isConsumationPending = false;
 
     this.cache = res;
-    if (!selfReq) await this.produce();
-  }
-
-  async produce() {
-    if (!this.cache) {
-      await this.consume(true);
-    }
 
     const consumers = this.wires.filter((p) => p.fromSocket?.machine === this);
 
@@ -90,19 +114,21 @@ export default class Machine<StateT> {
 
     for (var wire of consumers) {
       const val = this.cache![wire.fromSocket!.id];
-      if (wire.data) continue;
+      if (wire.data && wire.data.length) continue;
       wire.data = val;
+      if (!val.length) continue;
 
-      wire.toSocket!.machine.isConsumationPending = true;
       /*  wire.rays = rays; */
 
       const propTo = wire.toSocket?.machine!;
-
-      if (!machinesFilled.includes(propTo)) machinesFilled.push(propTo);
+      if (
+        !wire.toSocket?.machine.waitsForData &&
+        wire.data &&
+        !machinesFilled.includes(propTo)
+      )
+        machinesFilled.push(propTo);
     }
-    machinesFilled.map((c) =>
-      c.isConsumationPending ? c.consume(false) : null
-    );
+    for (const m of machinesFilled) await m.execute();
   }
 
   constructor(proto: MachinePrototype<StateT>, appStore: AppStore) {

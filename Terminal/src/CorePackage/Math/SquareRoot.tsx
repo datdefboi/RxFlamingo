@@ -28,6 +28,7 @@ export default class SquareRootMachine extends MachinePrototype<any> {
   id = UUID.FromString("2e292cc7-0e20-47a9-bebe-1d605bdeb4fa");
   name = "Получить корень";
   title = "";
+  isPerSetInvocable = true;
 
   async invoke(self: Machine<any>, params: RecordData[][]) {
     var numT = params[0][0].recordType!;

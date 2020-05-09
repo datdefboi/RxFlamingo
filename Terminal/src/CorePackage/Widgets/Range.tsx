@@ -44,7 +44,10 @@ export default class Range extends MachinePrototype<State> {
       step = self.state.step,
       rises = Math.sign(self.state.step) > 0;
 
-    for (var i = from; i <= to; i += step) out.push(new RecordData(numT, i));
+    if (rises)
+      for (var i = from; i <= to; i += step) out.push(new RecordData(numT, i));
+    else
+      for (var i = from; i >= to; i -= step) out.push(new RecordData(numT, i));
     return [out];
   }
 

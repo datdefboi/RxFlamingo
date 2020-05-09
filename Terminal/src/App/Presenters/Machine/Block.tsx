@@ -105,13 +105,11 @@ export default function BlockPresenter({
                 onClick={async (ev) => {
                   ev.stopPropagation();
                   state.cache = null;
-                  state.produce();
+                  state.execute();
                 }}
                 size={16}
               />
             ) : null}
-
-            <ChevronDoubleRightIcon size={16} />
           </div>
         ) : null}
       </BottomBar>

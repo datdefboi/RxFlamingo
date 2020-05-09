@@ -35,10 +35,7 @@ export default class NumericConstant extends MachinePrototype<State> {
 
   initShape = { value: 0 };
 
-  async invoke(
-    self: Machine<any>,
-    params: RecordData[][]
-  ){
+  async invoke(self: Machine<any>, params: RecordData[][]) {
     return [
       [
         new RecordData(
@@ -55,7 +52,10 @@ export default class NumericConstant extends MachinePrototype<State> {
         <InputField
           onMouseDown={(ev) => ev.stopPropagation()}
           value={self.state.value}
-          onChange={(ev) => (self.state.value = +ev.target.value)}
+          onChange={(ev) => {
+            self.state.value = +ev.target.value;
+            self.cache = null;
+          }}
         />
       </>
     );

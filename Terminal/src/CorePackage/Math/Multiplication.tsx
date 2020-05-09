@@ -33,7 +33,7 @@ export default class MultiplicationMachine extends MachinePrototype<any> {
     },
   ];
 
-  id = UUID.FromString("431007ea-7593-4745-b7a8-08f2b92f45cf");
+  id = UUID.FromString("431007ea-7593-4745-r7a8-08f2b92f45cf");
   name = "Умножить";
   title = "";
   isPerSetInvocable = true;

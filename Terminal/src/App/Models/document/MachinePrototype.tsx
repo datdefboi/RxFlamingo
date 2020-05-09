@@ -23,18 +23,16 @@ export default class MachinePrototype<StateT> {
   async invoke(
     self: Machine<StateT>,
     params: RecordData[][]
-  ): Promise<RecordData[][]> {
+  ): Promise<(RecordData)[][]> {
     return [[]];
   }
 
   async invokePerSet(
     self: Machine<StateT>,
     set: RecordData[]
-  ): Promise<RecordData[]> {
+  ): Promise<(RecordData | null)[]> {
     return [];
   }
-
-  async doRun(self: Machine<any>) {}
 
   onWireConnected(self: Machine<StateT>, wire: Wire) {}
 

@@ -58,15 +58,12 @@ export default class Route extends MachinePrototype<any> {
   name = "Переключатель";
   title = "Переключатель";
   isInvocable = false;
-
+  isPerSetInvocable = true;
   initShape = { type: UUID.Empty };
 
-  async invoke(self: Machine<any>, params: RecordData[][]) {
-    /*  return params.map((p) => {
-      const pred = p[1].value as boolean;
-      return [pred ? p[0] : null, !pred ? p[0] : null];
-    }); // TODO */
-    return [[]];
+  async invokePerSet(self: Machine<any>, params: RecordData[]) {
+    const pred = params[1].value as boolean;
+    return [pred ? params[0] : null, !pred ? params[0] : null];
   }
 
   onWireConnected(self: Machine<any>, wire: Wire) {

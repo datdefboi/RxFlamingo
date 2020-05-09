@@ -22,6 +22,14 @@ export default class TakeFirst extends MachinePrototype<any> {
     },
     {
       id: 0,
+      title: "остальные",
+      typeID: predefinedTypeIDs.any,
+      type: SocketType.Output,
+      isVirtual: false,
+      showTypeAnnotation: false,
+    },
+    {
+      id: 1,
       title: "1 >",
       typeID: predefinedTypeIDs.any,
       type: SocketType.Output,
@@ -38,13 +46,17 @@ export default class TakeFirst extends MachinePrototype<any> {
   initShape = { type: UUID.Empty };
 
   async invoke(self: Machine<any>, sets: RecordData[][]) {
-    const buffer = [];
-    const entriesN =
-      (self.sockets[1].isDocked ? 1 : 0) + self.dynamicSockets.length;
-    for (let i = 0; i < entriesN && i < sets.length; i++) {
-      buffer.push(sets[i][0]);
+    const entriesN = self.dynamicSockets.length;
+    const vals = sets[0];
+    const out = [vals.slice(entriesN)];
+    for (let i = 0; i < entriesN; i++) {
+      if (i < vals.length) {
+        out.push([vals[i]]);
+      } else {
+        out.push([]);
+      }
     }
-    return [buffer];
+    return out;
   }
 
   onWireConnected(self: Machine<any>, wire: Wire) {
@@ -52,19 +64,20 @@ export default class TakeFirst extends MachinePrototype<any> {
       const id = wire.fromSocket?.recordID!;
       self.sockets[0].recordID = id;
       self.sockets[1].recordID = id;
+      self.sockets[2].recordID = id;
       self.dynamicSockets.forEach((e) => {
         e.recordID = id;
       });
     }
-    let connectedCount = self.sockets[1].isDocked ? 1 : 0;
+    let connectedCount = self.sockets[2].isDocked ? 2 : 1;
     for (const s of self.dynamicSockets) if (s.isDocked) connectedCount++;
-    if (connectedCount == self.dynamicSockets.length + 1)
+    if (connectedCount == self.dynamicSockets.length + 2)
       self.dynamicSockets.push(
         new Socket(
           {
             id: connectedCount,
             showTypeAnnotation: false,
-            title: connectedCount + 1 + " >",
+            title: connectedCount + " >",
             typeID: self.sockets[0].recordID,
             type: SocketType.Output,
           },
