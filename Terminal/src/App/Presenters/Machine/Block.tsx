@@ -87,6 +87,7 @@ export default function BlockPresenter({
               }}
               size={16}
             />
+            <div style={{ marginLeft: "auto" }}></div>
             {/*   {state.cacheOut ? (
               <ContentSaveMoveIcon
                 onClick={() => (state.cacheOut = false)}

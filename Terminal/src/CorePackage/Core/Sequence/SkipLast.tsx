@@ -10,7 +10,7 @@ import MergeIcon from "mdi-react/MergeIcon";
 import React from "react";
 import styled from "styled-components";
 
-export default class SkipFirst extends MachinePrototype<any> {
+export default class SkipLast extends MachinePrototype<any> {
   sockets = [
     {
       id: 0,
@@ -46,9 +46,9 @@ export default class SkipFirst extends MachinePrototype<any> {
     },
   ];
 
-  id = UUID.FromString("f23aa20a-fb15-482d-bfc8-254168325b32");
-  name = "Пропустить первые";
-  title = "Пропустить первые";
+  id = UUID.FromString("f23aa20a-fs15-482d-bfc8-254168325b32");
+  name = "Пропустить последние";
+  title = "Пропустить последние";
   isInvocable = false;
 
   initShape = { type: UUID.Empty };
@@ -56,13 +56,8 @@ export default class SkipFirst extends MachinePrototype<any> {
   async invoke(self: Machine<any>, params: RecordData[][]) {
     const entriesN = params[1][0].value;
     const vals = params[0];
-    const vO = []
-    for (let i = 0; i < entriesN; i++) {
-      if (i < vals.length) {
-        vO.push(vals[i]);
-      }
-    }
-    return [vals.slice(entriesN), vO];
+    const end = vals.length - entriesN;
+    return [vals.slice(0, end), vals.slice(end, vals.length)];
   }
 
   onWireConnected(self: Machine<any>, wire: Wire) {

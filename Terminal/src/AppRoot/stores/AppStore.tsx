@@ -41,6 +41,7 @@ import TakeLast from "../../CorePackage/Core/Sequence/TakeLast";
 import SkipFirst from "../../CorePackage/Core/Sequence/SkipFirst";
 import SubMachine from "../../CorePackage/Math/Sub";
 import DivideMachine from "../../CorePackage/Math/Divide";
+import SkipLast from "../../CorePackage/Core/Sequence/SkipLast";
 
 export default class AppStore {
   @observable currentFactory: Factory = new Factory();
@@ -192,6 +193,7 @@ export default class AppStore {
         new TakeFirst(),
         new TakeLast(),
         new SkipFirst(),
+        new SkipLast(),
       ],
       name: "Управление",
       records: [],

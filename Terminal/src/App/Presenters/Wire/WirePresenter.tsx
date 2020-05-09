@@ -118,7 +118,7 @@ export default ({ state }: { state: Wire }) =>
                      ${endTarget.x + offsetX} ${endTarget.y + offsetY},
                       ${toPoint.x + offsetX} ${toPoint.y + offsetY}`}
           stroke={state.fromSocket?.recordType?.color}
-          stroke-dasharray="20,20"
+         /*  stroke-dasharray="20,20" */
           strokeWidth={stroke}
           stroke-linecap="round"
           fill="transparent"
