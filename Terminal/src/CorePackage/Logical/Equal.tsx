@@ -7,40 +7,44 @@ import Machine from "../../App/Presenters/Machine/Machine";
 import RecordData from "../../App/Models/execution/RecordData";
 import predefinedTypeIDs from "../../App/predefinedTypeIDs";
 
-export default class RootMachine extends MachinePrototype<any> {
+export default class Equal extends MachinePrototype<any> {
   sockets = [
     {
       id: 0,
-      title: "X",
+      title: "A",
       typeID: predefinedTypeIDs.number,
       type: SocketType.Input,
       showTypeAnnotation: true,
     },
     {
       id: 1,
-      title: "n",
+      title: "B",
       typeID: predefinedTypeIDs.number,
       type: SocketType.Input,
       showTypeAnnotation: true,
     },
     {
       id: 0,
-      title: "n√X",
-      typeID: predefinedTypeIDs.number,
+      title: "A=B",
+      typeID: predefinedTypeIDs.bool,
       type: SocketType.Output,
       showTypeAnnotation: true,
     },
   ];
 
-  id = UUID.FromString("91d2ee8e-31e9-423d-b7b0-2dc5005a4712");
-  name = "Получить корень в степени";
+  id = UUID.FromString("ae5eb624-a1ee-4382-9b09-c4a5e9c296a7");
+  name = "Равно";
   title = "";
   isPerSetInvocable = true;
 
   async invokePerSet(self: Machine<any>, params: RecordData[]) {
-    var numT = params[0].recordType!;
+    var numT = params[1].recordType;
     return [
-      new RecordData(numT, Math.pow(params[0].value, 1 / params[1].value)),
+      new RecordData(
+        numT!,
+        params[0].recordType === params[1].recordType &&
+          params[0].value === params[1].value
+      ),
     ];
   }
 }

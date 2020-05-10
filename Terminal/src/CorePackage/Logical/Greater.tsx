@@ -33,7 +33,7 @@ export default class Greater extends MachinePrototype<any> {
   ];
 
   id = UUID.FromString("ae5eb614-a1ee-4382-9b09-c4a5e9c296a7");
-  name = "Если больше";
+  name = "Больше";
   title = "";
   isPerSetInvocable = true;
 

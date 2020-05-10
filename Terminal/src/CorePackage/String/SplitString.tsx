@@ -7,40 +7,37 @@ import Machine from "../../App/Presenters/Machine/Machine";
 import RecordData from "../../App/Models/execution/RecordData";
 import predefinedTypeIDs from "../../App/predefinedTypeIDs";
 
-export default class RootMachine extends MachinePrototype<any> {
+export default class SplitString extends MachinePrototype<any> {
   sockets = [
     {
       id: 0,
-      title: "X",
+      title: "",
       typeID: predefinedTypeIDs.number,
       type: SocketType.Input,
       showTypeAnnotation: true,
     },
     {
       id: 1,
-      title: "n",
+      title: "разделитель",
       typeID: predefinedTypeIDs.number,
       type: SocketType.Input,
       showTypeAnnotation: true,
     },
     {
       id: 0,
-      title: "n√X",
+      title: "части",
       typeID: predefinedTypeIDs.number,
       type: SocketType.Output,
       showTypeAnnotation: true,
     },
   ];
 
-  id = UUID.FromString("91d2ee8e-31e9-423d-b7b0-2dc5005a4712");
-  name = "Получить корень в степени";
-  title = "";
-  isPerSetInvocable = true;
+  id = UUID.FromString("91d2ee8e-32e9-423d-b7b0-2dc5005a4712");
+  name = "Разделить";
+  title = "Разделить";
 
   async invokePerSet(self: Machine<any>, params: RecordData[]) {
     var numT = params[0].recordType!;
-    return [
-      new RecordData(numT, Math.pow(params[0].value, 1 / params[1].value)),
-    ];
+    return [new RecordData(numT, params[0].value * params[0].value)];
   }
 }

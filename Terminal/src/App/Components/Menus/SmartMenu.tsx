@@ -9,7 +9,8 @@ import PackageVariantClosedIcon from "mdi-react/PackageVariantClosedIcon";
 import ViewDashboardOutlineIcon from "mdi-react/ViewDashboardOutlineIcon";
 import ImportIcon from "mdi-react/ImportIcon";
 import ExportIcon from "mdi-react/ExportIcon";
-import CircleHalfFull from 'mdi-react/CircleHalfFullIcon'
+import CircleHalfFull from "mdi-react/CircleHalfFullIcon";
+import StringIcon from "mdi-react/FormatTextIcon";
 
 export default function SmartMenu({
   menuPos,
@@ -30,6 +31,8 @@ export default function SmartMenu({
         return <ViewDashboardOutlineIcon size={24} />;
       case "Логика":
         return <CircleHalfFull size={24} />;
+      case "Строки":
+        return <StringIcon size={24} />;
       default:
         return <div>{name}</div>;
     }

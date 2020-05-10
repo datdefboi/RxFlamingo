@@ -38,7 +38,7 @@ export default class Merge extends MachinePrototype<any> {
     },
   ];
 
-  id = UUID.FromString("f23aa30a-fb15-482d-bfc8-254168325b32");
+  id = UUID.FromString("f23aa30a-fb15-482d-bsc8-254168325b32");
   name = "Обьединить";
   title = "";
   isInvocable = false;
@@ -46,13 +46,7 @@ export default class Merge extends MachinePrototype<any> {
   initShape = { type: UUID.Empty };
 
   async invoke(self: Machine<any>, params: RecordData[][]) {
-    return params.map((p) => {
-      const out = [];
-      for (let i = 0; i < self.dynamicSockets.length; i++) {
-        out.push(Object.assign({}, p[0]));
-      }
-      return out;
-    }); // TODO
+    return [params.flat()]
   }
 
   onWireConnected(self: Machine<any>, wire: Wire) {

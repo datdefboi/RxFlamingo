@@ -42,6 +42,10 @@ import SkipFirst from "../../CorePackage/Core/Sequence/SkipFirst";
 import SubMachine from "../../CorePackage/Math/Sub";
 import DivideMachine from "../../CorePackage/Math/Divide";
 import SkipLast from "../../CorePackage/Core/Sequence/SkipLast";
+import Equal from "../../CorePackage/Logical/Equal";
+import StringConstant from "../../CorePackage/Widgets/StringConstant";
+import StringLog from "../../CorePackage/Widgets/StringLog";
+import Merge from "../../CorePackage/Core/Merge";
 
 export default class AppStore {
   @observable currentFactory: Factory = new Factory();
@@ -135,6 +139,26 @@ export default class AppStore {
           isRenames: false,
           editable: false,
         },
+      ],
+    } as Package;
+
+    const flow = {
+      color: "#223f54",
+      factories: [],
+      machinePrototypes: [
+        new Constructor(),
+        new Destructor(),
+        new Route(),
+        new Split(),
+        new Merge(),
+        new Destributor(),
+        new TakeFirst(),
+        new TakeLast(),
+        new SkipFirst(),
+        new SkipLast(),
+      ],
+      name: "Управление",
+      records: [
         {
           buildinRepresentation: "any",
           fields: [],
@@ -145,6 +169,22 @@ export default class AppStore {
           isRenames: false,
           editable: false,
         },
+      ],
+    } as Package;
+
+    const logical = {
+      color: "#522c44",
+      factories: [],
+      machinePrototypes: [
+        new Equal(),
+        new And(),
+        new Or(),
+        new Not(),
+        new Greater(),
+        new Lower(),
+      ],
+      name: "Логика",
+      records: [
         {
           buildinRepresentation: "boolean",
           fields: [],
@@ -155,62 +195,26 @@ export default class AppStore {
           isRenames: false,
           editable: false,
         },
+      ],
+    } as Package;
+
+    const string = {
+      color: "#5c4b09",
+      factories: [],
+      machinePrototypes: [new StringConstant(), new StringLog()],
+      name: "Строки",
+      records: [
         {
-          buildinRepresentation: null,
-          fields: [
-            {
-              typeID: predefinedUUID.number,
-              id: 0,
-              name: "х",
-              isRenames: false,
-            },
-            {
-              typeID: predefinedUUID.number,
-              id: 1,
-              name: "y",
-              isRenames: false,
-            },
-          ],
-          defaultValue: 0,
-          id: UUID.FromString("c517721a-f1f5-4f2d-9f61-ffd6481d63ec"),
-          name: "Вектор",
-          color: "teal",
+          buildinRepresentation: "string",
+          fields: [],
+          color: "#695509",
+          defaultValue: false,
+          id: predefinedUUID.char,
+          name: "Строка",
           isRenames: false,
           editable: false,
         },
       ],
-    } as Package;
-
-    const flow = {
-      color: "#4c3342",
-      factories: [],
-      machinePrototypes: [
-        new Constructor(),
-        new Destructor(),
-        new Route(),
-        new Split(),
-        new Destributor(),
-        new TakeFirst(),
-        new TakeLast(),
-        new SkipFirst(),
-        new SkipLast(),
-      ],
-      name: "Управление",
-      records: [],
-    } as Package;
-
-    const logical = {
-      color: "#42390c",
-      factories: [],
-      machinePrototypes: [
-        new And(),
-        new Or(),
-        new Not(),
-        new Greater(),
-        new Lower(),
-      ],
-      name: "Логика",
-      records: [],
     } as Package;
 
     const output = {
