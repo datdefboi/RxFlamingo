@@ -1,8 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "PaJ96+3Ws1sdossWT4p7kXOBsH8VWn6cDuNZP5uH5H2EkfxKyovC6a1FV81Q6MLdvmMRhocJTpfSgxlgJfzGDA==",
+  "dgSpecHash": "cDn0iC5KIj6JLjAMb+5v5IaECSGTa0QJDyeE/nechtvu7+ksDycciPWVui6v0GtC+90RuPS1W0RyeGX8z8iMMA==",
   "success": true,
   "projectFilePath": "C:\\Users\\datdefboi\\Repositories\\RxFlamingo\\Launcher\\Launcher.csproj",
-  "expectedPackageFiles": [],
+  "expectedPackageFiles": [
+    "C:\\Users\\datdefboi\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\3.1.2\\microsoft.aspnetcore.app.ref.3.1.2.nupkg.sha512",
+    "C:\\Users\\datdefboi\\.nuget\\packages\\microsoft.netcore.app.host.win-x64\\3.1.2\\microsoft.netcore.app.host.win-x64.3.1.2.nupkg.sha512"
+  ],
   "logs": []
 }
